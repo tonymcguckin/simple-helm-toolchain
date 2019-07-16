@@ -61,6 +61,8 @@ services:
           PROD_RESOURCE_GROUP: '{{form.pipeline.parameters.prod-resource-group}}'
           PROD_CLUSTER_NAME: '{{form.pipeline.parameters.prod-cluster-name}}'
           PROD_CLUSTER_NAMESPACE: '{{form.pipeline.parameters.prod-cluster-namespace}}'
+          VAULT_SERVICE_NAME: "hello-helm-vault"
+          VAULT_REGION: "ibm:yp:us-south"
         execute: true
   webide:
     service_id: orion

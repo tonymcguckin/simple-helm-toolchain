@@ -39,6 +39,20 @@ stages:
       #    source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh")
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
+
+      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+      section "Pipeline YML calling Key Protect integration..."
+
+      echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
+      echo "VAULT_REGION=${VAULT_REGION}"
+      echo "${VAULT_SERVICE_NAME}"
+      echo "${VAULT_REGION}"
+      echo "$VAULT_SERVICE_NAME"
+      echo "$VAULT_REGION"
+
+      create_vault_instance "${VAULT_SERVICE_NAME}" "${VAULT_REGION}"
+
+#create_vault_instance "tmgkp1" "ibm:yp:us-south"
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
       echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}"
