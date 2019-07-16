@@ -31,6 +31,7 @@ stages:
     image_name: ${CF_APP_NAME}
     script: |-
       #!/bin/bash
+
       # uncomment to debug the script
       # set -x
       # copy the script below into your app code repo (e.g. ./scripts/check_prebuild.sh) and 'source' it from your pipeline job
@@ -40,19 +41,18 @@ stages:
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
 
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
-      section "Pipeline YML calling Key Protect integration..."
+      #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+      #section "Pipeline YML calling Key Protect integration..."
 
-      echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
-      echo "VAULT_REGION=${VAULT_REGION}"
-      echo "${VAULT_SERVICE_NAME}"
-      echo "${VAULT_REGION}"
-      echo "$VAULT_SERVICE_NAME"
-      echo "$VAULT_REGION"
+      #echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
+      #echo "${VAULT_SERVICE_NAME}"
+      #echo "VAULT_REGION=${VAULT_REGION}"
+      #echo "${VAULT_REGION}"
+      #echo "$VAULT_SERVICE_NAME"
+      #echo "$VAULT_REGION"
 
-      create_vault_instance "${VAULT_SERVICE_NAME}" "${VAULT_REGION}"
+      #create_vault_instance "${VAULT_SERVICE_NAME}" "${VAULT_REGION}"
 
-#create_vault_instance "tmgkp1" "ibm:yp:us-south"
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
       echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}"
