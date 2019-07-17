@@ -41,6 +41,13 @@ stages:
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
 
+      VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}
+      VAULT_REGION=${VAULT_REGION}
+      RESOURCE_GROUP=${RESOURCE_GROUP}
+      echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
+      echo "VAULT_REGION=${VAULT_REGION}"
+      echo "RESOURCE_GROUP=${RESOURCE_GROUP}"
+
       source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
       save_key
 
