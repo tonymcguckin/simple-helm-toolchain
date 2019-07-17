@@ -212,16 +212,18 @@ function save_key {
     --header "Bluemix-Instance: $KP_GUID")
     check_value $KP_KEYS
 
+    echo "KP_KEYS=$KP_KEYS"
+
     # now check if the we're trying to save a key that already preexists...
     if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}")' > /dev/null; then
-        echo "Saved key '${KEY_NAME}' already exists."
+        echo "Reusing saved key '${KEY_NAME}' as it already exists..."
     else
         KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
           --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
           --header "Bluemix-Instance: $KP_GUID" \
           --header "Prefer: return=representation" \
           --header "Content-Type: application/vnd.ibm.kms.key+json" \
-          --data '{ \
+          -d '{ \
             "metadata": { \
                 "collectionType": "application/vnd.ibm.kms.key+json", \
                 "collectionTotal": 1 \
@@ -235,6 +237,8 @@ function save_key {
               } \
             ] \
           }')
+
+        echo "KP_KEYS=$KP_KEYS"
 
         check_value "$KP_KEYS"
     fi
