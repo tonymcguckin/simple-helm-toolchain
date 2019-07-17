@@ -218,6 +218,38 @@ function save_key {
     if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}")' > /dev/null; then
         echo "Reusing saved key '${KEY_NAME}' as it already exists..."
     else
+        DATA='{
+            "metadata": {
+                "collectionType": "application/vnd.ibm.kms.key+json",
+                "collectionTotal": 1
+            },
+            "resources": [
+              {
+                "name": "${KEY_NAME}",
+                "type": "application/vnd.ibm.kms.key+json",
+                "payload": "${KEY_MATERIAL}",
+                "extractable": true
+              }
+            ]
+          }'
+
+        echo "DATA=$DATA"
+        DATA2=$('{
+            "metadata": {
+                "collectionType": "application/vnd.ibm.kms.key+json",
+                "collectionTotal": 1
+            },
+            "resources": [
+              {
+                "name": "${KEY_NAME}",
+                "type": "application/vnd.ibm.kms.key+json",
+                "payload": "${KEY_MATERIAL}",
+                "extractable": true
+              }
+            ]
+          }')
+        echo "DATA2=$DATA2"
+
         KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
           --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
           --header "Bluemix-Instance: $KP_GUID" \
