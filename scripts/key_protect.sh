@@ -227,7 +227,7 @@ function save_key {
               {
                 "name": "${KEY_NAME}",
                 "type": "application/vnd.ibm.kms.key+json",
-                "payload": "${KEY_MATERIAL}",
+                "payload": "$KEY_MATERIAL",
                 "extractable": true
               }
             ]
@@ -249,7 +249,7 @@ function save_key {
               {
                 "name": "${KEY_NAME}",
                 "type": "application/vnd.ibm.kms.key+json",
-                "payload": "${KEY_MATERIAL}",
+                "payload": "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=",
                 "extractable": true
               }
             ]
