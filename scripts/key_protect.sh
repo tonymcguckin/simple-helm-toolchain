@@ -29,8 +29,72 @@
 #
 ## ----------------------------------------------------------------------------
 
-# create an instance of the secrets vault...
-function create_vault_instance {
+#source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+#section "Pipeline YML calling Key Protect integration..."
+#echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
+#echo "VAULT_REGION=${VAULT_REGION}"
+#ibmcloud target -g devex-playground
+#create_vault_instance "${VAULT_SERVICE_NAME}" "${VAULT_REGION}"
+#create_vault_instance "tmgkp1" "ibm:yp:us-south"
+#create_vault_instance "tmgkp1" "us-south"
+#section "Begin: create_vault_instance: tmgkp1"
+#
+#if check_exists "$(ibmcloud resource service-instance tmgkp1 2>&1)"; then
+#    echo "Key Protect service named 'tmgkp1' already exists"
+#else
+#    ibmcloud resource service-instance-create tmgkp1 kms tiered-pricing us-south || exit 1
+#fi
+#
+#KP_INSTANCE_ID=$(get_instance_id tmgkp1)
+#KP_GUID=$(get_guid tmgkp1)
+#echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
+#echo "KP_GUID=$KP_GUID"
+#check_value "$KP_INSTANCE_ID"
+#check_value "$KP_GUID"
+#
+#if check_exists "$(ibmcloud resource service-key tmgkp1-acckey-$KP_GUID 2>&1)"; then
+#    echo "Key Protect key already exists"
+#else
+#    ibmcloud resource service-key-create tmgkp1-acckey-$KP_GUID Manager \
+#        --instance-id "$KP_INSTANCE_ID" || exit 1
+#fi
+#
+#KP_CREDENTIALS=$(ibmcloud resource service-key tmgkp1-acckey-$KP_GUID --output JSON)
+#KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
+#KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
+#KP_MANAGEMENT_URL="https://us-south.kms.cloud.ibm.com/api/v2/keys"
+#KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
+#  --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+#  --header "Bluemix-Instance: $KP_GUID")
+#check_value "$KP_KEYS"
+#
+#echo "$KP_KEYS"
+#
+#if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="docker_trust_private_key")' > /dev/null; then
+#  echo "Docker Trust private key already exists"
+#else
+#  KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
+#    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+#    --header "Bluemix-Instance: $KP_GUID" \
+#    --header "Content-Type: application/vnd.ibm.kms.key+json" -d @scripts/docker_trust_private_key.json)
+#fi
+#
+#DT_PRIVATE_KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="docker_trust_private_key") | .id')
+#echo "DT_PRIVATE_KEY_ID=$DT_PRIVATE_KEY_ID"
+#
+#DT_PRIVATE_KEY_VALUE=$(curl -s "${KP_MANAGEMENT_URL}/${DT_PRIVATE_KEY_ID}" \
+#    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+#    --header "Bluemix-Instance: $KP_GUID" \
+#    --header "Accept: application/vnd.ibm.kms.key+json")
+#
+#echo "$DT_PRIVATE_KEY_VALUE"
+#
+#section "End: create_vault_instance: tmgkp1"
+
+## ----------------------------------------------------------------------------
+
+# get an instance of the secrets vault...
+function get_vault_instance {
     ##
     # keyprotect assumed default at the moment but
     # optional hashicorp vault provider should be
@@ -66,12 +130,133 @@ function create_vault_instance {
 
 ## ----------------------------------------------------------------------------
 
+function save_key {
+    ##
+    # save_key $KP_SERVICE_NAME $KEY_NAME $KEY_MATERIAL
+    #
+
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+
+    VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}
+    VAULT_REGION=${VAULT_REGION}
+    RESOURCE_GROUP=${RESOURCE_GROUP}
+    echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
+    echo "VAULT_REGION=${VAULT_REGION}"
+    echo "RESOURCE_GROUP=${RESOURCE_GROUP}"
+
+    #ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g devex-playground
+
+    KP_SERVICE_NAME=tmgkp1
+    KEY_NAME=abcdedf0123456789.key
+    KEY_MATERIAL=LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=
+
+    section "Begin: save_key: $KP_SERVICE_NAME"
+
+    REGION=$IBM_CLOUD_REGION
+    KP_MANAGEMENT_URL=https://$REGION.kms.cloud.ibm.com/api/v2/keys
+    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
+    KP_GUID=$(get_guid $KP_SERVICE_NAME)
+    KP_SERVICE_KEY_NAME=$KP_SERVICE_NAME-service-key-$KP_GUID
+
+    check_value $REGION
+    check_value $KP_MANAGEMENT_URL
+    check_value $KP_INSTANCE_ID
+    check_value $KP_GUID
+    check_value $KP_SERVICE_KEY_NAME
+
+    ##
+    # create an instance of keyprotect if it's not already there...
+    ##
+    if check_exists "$(ibmcloud resource service-instance $KP_SERVICE_NAME 2>&1)"; then
+        echo "Reusing Key Protect service named '$KP_SERVICE_NAME' as it already exists..."
+    else
+        echo "Creating new Key Protect service instance named '$KP_SERVICE_KEY_NAME'..."
+        ibmcloud resource service-instance-create $KP_SERVICE_NAME kms tiered-pricing $REGION || exit 1
+    fi
+
+    ##
+    # get or generate a service-key for keyprotect...
+    # need this in order to work with iam to get credentials...
+    ##
+    if check_exists "$(ibmcloud resource service-key $KP_SERVICE_KEY_NAME 2>&1)"; then
+        echo "Reusing Key Protect service-key '$KP_SERVICE_KEY_NAME' as it already exists..."
+    else
+        echo "Creating new Key Protect service-key '$KP_SERVICE_KEY_NAME'..."
+        ibmcloud resource service-key-create $KP_SERVICE_KEY_NAME Manager \
+            --instance-id "$KP_INSTANCE_ID" || exit 1
+    fi
+
+    KP_CREDENTIALS=$(ibmcloud resource service-key $KP_SERVICE_KEY_NAME --output JSON)
+    check_value $KP_CREDENTIALS
+    KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    check_value $KP_IAM_APIKEY
+    KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
+    check_value $KP_ACCESS_TOKEN
+
+    echo "REGION=$REGION"
+    echo "KP_MANAGEMENT_URL=$KP_MANAGEMENT_URL"
+    echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
+    echo "KP_GUID=$KP_GUID"
+    echo "KP_SERVICE_KEY_NAME=$KP_SERVICE_KEY_NAME"
+    echo "KP_CREDENTIALS=$KP_CREDENTIALS"
+    echo "KP_IAM_APIKEY=$KP_IAM_APIKEY"
+    echo "KP_ACCESS_TOKEN=$KP_ACCESS_TOKEN"
+    echo "BASE64_KEY_MATERIAL=$BASE64_KEY_MATERIAL"
+
+    # get a list of keys on this kp instance first...
+    KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
+    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $KP_GUID")
+    check_value $KP_KEYS
+
+    # now check if the we're trying to save a key that already preexists...
+    if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KP_KEY_NAME}")' > /dev/null; then
+        echo "Saved key '${KP_KEY_NAME}' already exists."
+    else
+        KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
+          --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+          --header "Bluemix-Instance: $KP_GUID" \
+          --header "Prefer: return=representation" \
+          --header "Content-Type: application/vnd.ibm.kms.key+json" \
+          --data '{ \
+            "metadata": { \
+                "collectionType": "application/vnd.ibm.kms.key+json", \
+                "collectionTotal": 1 \
+            }, \
+            "resources": [ \
+              { \
+                "name": "${KP_KEY_NAME}", \
+                "type": "application/vnd.ibm.kms.key+json", \
+                "payload": "${BASE64_KEY_MATERIAL}", \
+                "extractable": true \
+              } \
+            ] \
+          }')
+
+        check_value "$KP_KEYS"
+    fi
+
+    # extract the id of our saved key...
+    KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KP_KEY_NAME}") | .id')
+
+    echo "KP_KEYS=$KP_KEYS"
+    echo "KEY_ID=$KEY_ID"
+
+    section "End: save_key: $KP_SERVICE_NAME"
+
+    # return the new key id...
+    echo $KEY_ID
+}
+
+## ----------------------------------------------------------------------------
+
 function assign_iam_writer_access_for_service {
     ##
-    # assign_iam_writer_access_for_service $SERVICE_ID $KP_SERVICE_NAME $KP_GUID
+    # assign_iam_writer_access_for_service $KP_SERVICE_NAME $KP_GUID $SERVICE_ID
     #
     
-    section "assign_iam_writer_access_for_service: $KP_SERVICE_NAME"
+    section "assign_iam_writer_access_for_service: $1"
     
     EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json)
     echo "EXISTING_POLICIES=$EXISTING_POLICIES"
@@ -85,105 +270,9 @@ function assign_iam_writer_access_for_service {
         ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
     fi
 
-    KP_CREDENTIALS=$(ibmcloud resource service-key $KP_SERVICE_NAME-acckey-$KP_GUID --output JSON)
+    KP_CREDENTIALS=$(ibmcloud resource service-key $1-acckey-$KP_GUID --output JSON)
     KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
     KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
-}
-
-## ----------------------------------------------------------------------------
-
-function generate_root_key {
-    ##
-    # generate_root_key $KP_SERVICE_NAME $REGION $KP_ACCESS_TOKEN $KP_GUID
-    #
-    
-    section "generate_root_key: $KP_SERVICE_NAME"
-
-    KP_MANAGEMENT_URL="https://$REGION.kms.cloud.ibm.com/api/v2/keys"
-
-    # create a root key based on the @scripts/root-enckey.json
-    # definition if it does not exist...
-    KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
-    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $KP_GUID")
-    check_value "$KP_KEYS"
-
-    if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="$KP_SERVICE_NAME-root-enckey")' > /dev/null; then
-        echo "Root key already exists for service '$KP_SERVICE_NAME'"
-    else
-        KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
-            --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-            --header "Bluemix-Instance: $KP_GUID" \
-            --header "Content-Type: application/vnd.ibm.kms.key+json" -d @scripts/root-enckey.json)
-    fi
-
-    ROOT_KEY_CRN=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="$KP_SERVICE_NAME-root-enckey") | .crn')
-    echo "ROOT_KEY_CRN=$ROOT_KEY_CRN"
-}
-
-## ----------------------------------------------------------------------------
-
-function generate_standard_key {
-    ##
-    # generate_standard_key $KP_SERVICE_NAME $REGION $KP_ACCESS_TOKEN $KP_GUID
-    #
-    
-    section "generate_standard_key: $KP_SERVICE_NAME"
-
-    KP_MANAGEMENT_URL="https://$REGION.kms.cloud.ibm.com/api/v2/keys"
-
-    # Create standard key if it does not exist
-    KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
-    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $KP_GUID")
-    check_value "$KP_KEYS"
-
-    if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="$KP_SERVICE_NAME-standard-enckey")' > /dev/null; then
-        echo "Standard key already exists for service '$KP_SERVICE_NAME'"
-    else
-        KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
-            --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-            --header "Bluemix-Instance: $KP_GUID" \
-            --header "Content-Type: application/vnd.ibm.kms.key+json" -d @scripts/standard-enckey.json)
-    fi
-
-    STANDARD_KEY_CRN=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="$KP_SERVICE_NAME-standard-enckey") | .crn')
-    echo "STANDARD_KEY_CRN=$STANDARD_KEY_CRN"
-}
-
-## ----------------------------------------------------------------------------
-
-function retrieve_vault_instance {
-    ##
-    # 
-    ##
-    
-    section "retrieve_vault_instance: $KP_SERVICE_NAME"
-    
-    #
-    # retrieve_vault_instance service-name service_id /*integrated service id for writer/iam access*/
-    #
-    # eg: retrieve_vault_instance secure-file-storage-kms region
-    ##
-    if check_exists "$(ibmcloud resource service-instance $KP_SERVICE_NAME 2>&1)"; then
-        echo "Key Protect service named '$KP_SERVICE_NAME' already exists"
-    else
-        ibmcloud resource service-instance-create $KP_SERVICE_NAME kms tiered-pricing $REGION || exit 1
-    fi
-
-    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
-    KP_GUID=$(get_guid $KP_SERVICE_NAME)
-    echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
-    echo "KP_GUID=$KP_GUID"
-    check_value "$KP_INSTANCE_ID"
-    check_value "$KP_GUID"
-
-    if check_exists "$(ibmcloud resource service-key $KP_SERVICE_NAME-acckey-$KP_GUID 2>&1)"; then
-        echo "Key Protect key already exists"
-    else
-        ibmcloud resource service-key-create $KP_SERVICE_NAME-acckey-$KP_GUID Manager \
-            --instance-id "$KP_INSTANCE_ID" || exit 1
-    fi
 }
 
 ## ----------------------------------------------------------------------------
@@ -204,6 +293,18 @@ function delete_vault_instance {
     ##
     
     section "delete_vault_instance: $KP_SERVICE_NAME"
+}
+
+## ----------------------------------------------------------------------------
+
+function delete_key {
+    ##
+    # delete_key $KEY_ID
+    ##
+    
+    section "delete_key: $1"
+
+
 }
 
 ## ----------------------------------------------------------------------------
