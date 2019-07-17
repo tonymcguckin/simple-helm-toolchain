@@ -262,8 +262,6 @@ function save_key {
 
     # extract the id of our saved key...
     KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}") | .id')
-
-    echo "KP_KEYS=$KP_KEYS"
     echo "KEY_ID=$KEY_ID"
 
     section "End: save_key: $KP_SERVICE_NAME"
