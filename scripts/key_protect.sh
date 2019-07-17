@@ -230,9 +230,9 @@ function save_key {
             },
             "resources": [
               {
-                "name": ${KEY_NAME},
+                "name": "${KEY_NAME}",
                 "type": "application/vnd.ibm.kms.key+json",
-                "payload": ${KEY_MATERIAL},
+                "payload": "${KEY_MATERIAL}",
                 "extractable": true
               }
             ]
