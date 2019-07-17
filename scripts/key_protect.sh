@@ -223,19 +223,19 @@ function save_key {
           --header "Bluemix-Instance: $KP_GUID" \
           --header "Prefer: return=representation" \
           --header "Content-Type: application/vnd.ibm.kms.key+json" \
-          -d '{ \
-            "metadata": { \
-                "collectionType": "application/vnd.ibm.kms.key+json", \
-                "collectionTotal": 1 \
-            }, \
-            "resources": [ \
-              { \
-                "name": "${KEY_NAME}", \
-                "type": "application/vnd.ibm.kms.key+json", \
-                "payload": "${KEY_MATERIAL}", \
-                "extractable": true \
-              } \
-            ] \
+          -d '{
+            "metadata": {
+                "collectionType": "application/vnd.ibm.kms.key+json",
+                "collectionTotal": 1
+            },
+            "resources": [
+              {
+                "name": "${KEY_NAME}",
+                "type": "application/vnd.ibm.kms.key+json",
+                "payload": "${KEY_MATERIAL}",
+                "extractable": true
+              }
+            ]
           }')
 
         echo "KP_KEYS=$KP_KEYS"
