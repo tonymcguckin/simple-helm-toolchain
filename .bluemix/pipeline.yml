@@ -46,6 +46,8 @@ stages:
 
       save_key
 
+      env
+
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
       echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}"
