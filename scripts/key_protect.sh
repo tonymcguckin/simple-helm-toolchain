@@ -194,6 +194,7 @@ function save_key {
     KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
     check_value $KP_ACCESS_TOKEN
 
+    echo "KP_SERVICE_NAME=$KP_SERVICE_NAME"
     echo "REGION=$REGION"
     echo "KP_MANAGEMENT_URL=$KP_MANAGEMENT_URL"
     echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
@@ -202,7 +203,8 @@ function save_key {
     echo "KP_CREDENTIALS=$KP_CREDENTIALS"
     echo "KP_IAM_APIKEY=$KP_IAM_APIKEY"
     echo "KP_ACCESS_TOKEN=$KP_ACCESS_TOKEN"
-    echo "BASE64_KEY_MATERIAL=$BASE64_KEY_MATERIAL"
+    echo "KEY_NAME=$KEY_NAME"
+    echo "KEY_MATERIAL=$KEY_MATERIAL"
 
     # get a list of keys on this kp instance first...
     KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
@@ -211,8 +213,8 @@ function save_key {
     check_value $KP_KEYS
 
     # now check if the we're trying to save a key that already preexists...
-    if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KP_KEY_NAME}")' > /dev/null; then
-        echo "Saved key '${KP_KEY_NAME}' already exists."
+    if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}")' > /dev/null; then
+        echo "Saved key '${KEY_NAME}' already exists."
     else
         KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
           --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
@@ -226,9 +228,9 @@ function save_key {
             }, \
             "resources": [ \
               { \
-                "name": "${KP_KEY_NAME}", \
+                "name": "${KEY_NAME}", \
                 "type": "application/vnd.ibm.kms.key+json", \
-                "payload": "${BASE64_KEY_MATERIAL}", \
+                "payload": "${KEY_MATERIAL}", \
                 "extractable": true \
               } \
             ] \
@@ -238,7 +240,7 @@ function save_key {
     fi
 
     # extract the id of our saved key...
-    KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KP_KEY_NAME}") | .id')
+    KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}") | .id')
 
     echo "KP_KEYS=$KP_KEYS"
     echo "KEY_ID=$KEY_ID"

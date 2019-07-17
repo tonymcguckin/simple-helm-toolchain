@@ -42,8 +42,6 @@ stages:
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
 
       source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
-      section "Pipeline YML calling Key Protect integration..."
-
       save_key
 
       env
