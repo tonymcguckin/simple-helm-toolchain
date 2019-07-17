@@ -148,7 +148,7 @@ function save_key {
     ibmcloud target -g devex-playground
 
     KP_SERVICE_NAME=tmgkp1
-    KEY_NAME=abcdedf0123456789.key
+    KEY_NAME=0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
     KEY_MATERIAL="LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo="
 
     section "Begin: save_key: $KP_SERVICE_NAME"
@@ -212,7 +212,10 @@ function save_key {
     --header "Bluemix-Instance: $KP_GUID")
     check_value $KP_KEYS
 
+    echo "-----------------"
+    echo "Key List (Before):"
     echo "KP_KEYS=$KP_KEYS"
+    echo "-----------------"
 
     # now check if the we're trying to save a key that already preexists...
     if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}")' > /dev/null; then
@@ -247,7 +250,7 @@ function save_key {
             },
             "resources": [
               {
-                "name": "abcdedf0123456789.key",
+                "name": "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key",
                 "type": "application/vnd.ibm.kms.key+json",
                 "payload": "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=",
                 "extractable": true
@@ -255,9 +258,10 @@ function save_key {
             ]
           }')
 
+        echo "-----------------"
+        echo "Key List (After):"
         echo "KP_KEYS=$KP_KEYS"
-
-        check_value "$KP_KEYS"
+        echo "-----------------"
     fi
 
     # extract the id of our saved key...
