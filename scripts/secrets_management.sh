@@ -350,7 +350,7 @@ function generate_auto_secret {
 
 ## ----------------------------------------------------------------------------
 
-function retrieve_key {
+function retrieve_secret {
     ##
     # retrieve_secret $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME
     #
@@ -446,7 +446,7 @@ function retrieve_key {
 
 ## ----------------------------------------------------------------------------
 
-function delete_key {
+function delete_secret {
     ##
     # delete_secret $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME
     #
