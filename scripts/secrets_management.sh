@@ -173,17 +173,6 @@ function save_byok_secret {
     echo "$VAULT_SECRET_ID"
     echo "-----------------"
 
-    # retrieve the specific vault secret itself...
-    VAULT_SECRETS=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
-    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $VAULT_GUID")
-    check_value $VAULT_SECRETS
-    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
-    check_value $RETRIEVED_SECRET_MATERIAL
-    echo "New (or refetched) vault BYOK secret named '${SECRET_NAME}' has Base64 Key Material:"
-    echo "$RETRIEVED_SECRET_MATERIAL"
-    echo "-----------------"
-
     section "End: save_byok_secret: $VAULT_SERVICE_NAME"
 
     echo $VAULT_SECRET_ID
@@ -332,17 +321,6 @@ function generate_auto_secret {
     echo "$VAULT_SECRET_ID"
     echo "-----------------"
 
-    # retrieve the specific vault secret itself...
-    VAULT_SECRETS=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
-    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $VAULT_GUID")
-    check_value $VAULT_SECRETS
-    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
-    check_value $RETRIEVED_SECRET_MATERIAL
-    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has Base64 Key Material:"
-    echo "$RETRIEVED_SECRET_MATERIAL"
-    echo "-----------------"
-
     section "End: generate_auto_secret: $VAULT_SERVICE_NAME"
 
     echo $VAULT_SECRET_ID
@@ -375,7 +353,7 @@ function retrieve_secret {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME"
+    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
     ibmcloud target -g $RESOURCE_GROUP
 
@@ -429,17 +407,17 @@ function retrieve_secret {
     echo "-----------------"
 
     # retrieve the specific vault secret itself...
-    VAULT_SECRETS=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
+    VAULT_SECRET=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
     --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
     --header "Bluemix-Instance: $VAULT_GUID")
-    check_value $VAULT_SECRETS
-    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
+    check_value $VAULT_SECRET
+    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRET" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
     check_value $RETRIEVED_SECRET_MATERIAL
     echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has Base64 Key Material:"
     echo "$RETRIEVED_SECRET_MATERIAL"
     echo "-----------------"
 
-    section "End: retrieve_secret: $VAULT_SERVICE_NAME"
+    section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
     echo $RETRIEVED_SECRET_MATERIAL
 }
@@ -471,7 +449,7 @@ function delete_secret {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: delete_secret: $VAULT_SERVICE_NAME"
+    section "Begin: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
     ibmcloud target -g $RESOURCE_GROUP
 
@@ -485,9 +463,46 @@ function delete_secret {
     check_value $VAULT_GUID
     check_value $VAULT_SERVICE_SERVICE_KEY_NAME
 
-    
+    VAULT_CREDENTIALS=$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME --output JSON)
+    check_value $VAULT_CREDENTIALS
+    VAULT_IAM_APIKEY=$(echo "$VAULT_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    check_value $VAULT_IAM_APIKEY
+    VAULT_ACCESS_TOKEN=$(get_access_token $VAULT_IAM_APIKEY)
+    check_value $VAULT_ACCESS_TOKEN
 
-    section "End: delete_secret: $VAULT_SERVICE_NAME"
+    echo "-----------------"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_MANAGEMENT_URL=$VAULT_MANAGEMENT_URL"
+    echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+    echo "VAULT_GUID=$VAULT_GUID"
+    echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+    echo "-----------------"
+    echo "VAULT_CREDENTIALS=$VAULT_CREDENTIALS"
+    echo "VAULT_IAM_APIKEY=$VAULT_IAM_APIKEY"
+    echo "VAULT_ACCESS_TOKEN=$VAULT_ACCESS_TOKEN"
+    echo "-----------------"
+    echo "SECRET_NAME=$SECRET_NAME"
+    echo "-----------------"
+
+    # get a list of secrets on this vault secrets management service instance first...
+    VAULT_SECRETS=$(curl -s $VAULT_MANAGEMENT_URL \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+
+    echo "Current list of vault secrets:"
+    echo "$VAULT_SECRETS"
+    echo "-----------------"
+
+    # extract the id of our newly saved (or refetched) auto secret...
+    VAULT_SECRET_ID=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .id')
+    check_value $VAULT_SECRET_ID
+    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has public facing ID:"
+    echo "$VAULT_SECRET_ID"
+    echo "-----------------"
+
+    section "End: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
     echo 0
 }
