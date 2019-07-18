@@ -62,7 +62,7 @@ stages:
       #
       BYOK_ID=$(
         save_byok_secret \
-          "tmgkp1" \
+          "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
           "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
@@ -74,7 +74,7 @@ stages:
       #
       #BYOK_VALUE=$(
       #  retrieve_secret \
-      #    "tmgkp1" \
+      #    "tmg-secrets-vault" \
       #    "us-south" \
       #    "devex-playground" \
       #    "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
@@ -85,7 +85,7 @@ stages:
       #
       #DELETE_RESPONSE=$(
       #  delete_secret \
-      #    "tmgkp1" \
+      #    "tmg-secrets-vault" \
       #    "us-south" \
       #    "devex-playground" \
       #    "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
@@ -308,7 +308,7 @@ stages:
       #
       BYOK_VALUE=$(
         retrieve_secret \
-          "tmgkp1" \
+          "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
           "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
@@ -774,7 +774,7 @@ stages:
       #
       DELETE_RESPONSE=$(
         delete_secret \
-          "tmgkp1" \
+          "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
           "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
