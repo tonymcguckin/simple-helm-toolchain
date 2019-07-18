@@ -46,6 +46,7 @@ function save_byok_secret {
     #  "my_resource_group" \
     #  "my_secret_name" \
     #  "LS0tLS1C...my_base64_encoded_secret_material...LQo="
+    VAULT_SECRET_ID=$(
 
     VAULT_SERVICE_NAME=$1
     VAULT_REGION=$2
@@ -186,6 +187,7 @@ function save_byok_secret {
 
     section "End: save_byok_secret: $VAULT_SERVICE_NAME"
 
+    )
     echo $VAULT_SECRET_ID
 }
 
