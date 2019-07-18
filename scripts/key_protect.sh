@@ -93,43 +93,6 @@
 
 ## ----------------------------------------------------------------------------
 
-# get an instance of the secrets vault...
-function get_vault_instance {
-    ##
-    # keyprotect assumed default at the moment but
-    # optional hashicorp vault provider should be
-    # handled/tested here too...
-    
-    section "create_vault_instance: $1"
-    
-    #
-    # create_vault_instance service-name region
-    #
-    # eg: create_vault_instance secure-file-storage-kms region
-    ##
-    if check_exists "$(ibmcloud resource service-instance $1 2>&1)"; then
-        echo "Key Protect service named '$1' already exists"
-    else
-        ibmcloud resource service-instance-create $1 kms tiered-pricing $2 || exit 1
-    fi
-
-    KP_INSTANCE_ID=$(get_instance_id $1)
-    KP_GUID=$(get_guid $1)
-    echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
-    echo "KP_GUID=$KP_GUID"
-    check_value "$KP_INSTANCE_ID"
-    check_value "$KP_GUID"
-
-    if check_exists "$(ibmcloud resource service-key $1-acckey-$KP_GUID 2>&1)"; then
-        echo "Key Protect key already exists"
-    else
-        ibmcloud resource service-key-create $1-acckey-$KP_GUID Manager \
-            --instance-id "$KP_INSTANCE_ID" || exit 1
-    fi
-}
-
-## ----------------------------------------------------------------------------
-
 function save_key {
     ##
     # save_key $KP_SERVICE_NAME $KEY_NAME $KEY_MATERIAL $RESOURCE_GROUP
@@ -265,7 +228,6 @@ function save_key {
     # extract the id of our newly saved (or refetched) key...
     KEY_ID=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'") | .id')
     check_value $KEY_ID
-    echo "-----------------"
     echo "New (or refetched) Standard Key named '${KEY_NAME}' has public facing ID:"
     echo "$KEY_ID"
     echo "-----------------"
@@ -286,12 +248,102 @@ function save_key {
 
 ## ----------------------------------------------------------------------------
 
+function retrieve_key {
+    ##
+    # retrieve_key $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
+    #
+
+    ##
+    # Typical usage:
+    # --------------
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #retrieve_key \
+    #  "tmgkp1" \
+    #  "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+    #  "devex-playground"
+
+    KP_SERVICE_NAME=$1
+    KEY_NAME=$2
+    RESOURCE_GROUP=$4
+
+    check_value $KP_SERVICE_NAME
+    check_value $KEY_NAME
+    check_value $RESOURCE_GROUP
+
+    section "Begin: retrieve_key: $KP_SERVICE_NAME"
+
+    ibmcloud target -g $RESOURCE_GROUP
+
+    REGION=$IBM_CLOUD_REGION
+    KP_MANAGEMENT_URL=https://$REGION.kms.cloud.ibm.com/api/v2/keys
+    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
+    KP_GUID=$(get_guid $KP_SERVICE_NAME)
+    KP_SERVICE_KEY_NAME=$KP_SERVICE_NAME-service-key-$KP_GUID
+
+    check_value $REGION
+    check_value $KP_MANAGEMENT_URL
+    check_value $KP_INSTANCE_ID
+    check_value $KP_GUID
+    check_value $KP_SERVICE_KEY_NAME
+
+    
+
+    section "End: retrieve_key: $KP_SERVICE_NAME"
+}
+
+## ----------------------------------------------------------------------------
+
+function delete_key {
+    ##
+    # delete_key $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
+    #
+
+    ##
+    # Typical usage:
+    # --------------
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #delete_key \
+    #  "tmgkp1" \
+    #  "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+    #  "devex-playground"
+
+    KP_SERVICE_NAME=$1
+    KEY_NAME=$2
+    RESOURCE_GROUP=$4
+
+    check_value $KP_SERVICE_NAME
+    check_value $KEY_NAME
+    check_value $RESOURCE_GROUP
+
+    section "Begin: delete_key: $KP_SERVICE_NAME"
+
+    ibmcloud target -g $RESOURCE_GROUP
+
+    REGION=$IBM_CLOUD_REGION
+    KP_MANAGEMENT_URL=https://$REGION.kms.cloud.ibm.com/api/v2/keys
+    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
+    KP_GUID=$(get_guid $KP_SERVICE_NAME)
+    KP_SERVICE_KEY_NAME=$KP_SERVICE_NAME-service-key-$KP_GUID
+
+    check_value $REGION
+    check_value $KP_MANAGEMENT_URL
+    check_value $KP_INSTANCE_ID
+    check_value $KP_GUID
+    check_value $KP_SERVICE_KEY_NAME
+
+    
+
+    section "End: delete_key: $KP_SERVICE_NAME"
+}
+
+## ----------------------------------------------------------------------------
+
 function assign_iam_writer_access_for_service {
     ##
     # assign_iam_writer_access_for_service $KP_SERVICE_NAME $KP_GUID $SERVICE_ID
     #
     
-    section "assign_iam_writer_access_for_service: $1"
+    section "Begin: assign_iam_writer_access_for_service: $1"
     
     EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json)
     echo "EXISTING_POLICIES=$EXISTING_POLICIES"
@@ -308,16 +360,47 @@ function assign_iam_writer_access_for_service {
     KP_CREDENTIALS=$(ibmcloud resource service-key $1-acckey-$KP_GUID --output JSON)
     KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
     KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
+
+    section "End: assign_iam_writer_access_for_service: $1"
 }
 
 ## ----------------------------------------------------------------------------
 
-function update_vault_instance {
+# get an instance of the secrets vault...
+function get_vault_instance {
     ##
-    # 
-    ##
+    # keyprotect assumed default at the moment but
+    # optional hashicorp vault provider should be
+    # handled/tested here too...
     
-    section "update_vault_instance: $KP_SERVICE_NAME"
+    section "Begin: create_vault_instance: $1"
+    
+    #
+    # create_vault_instance service-name region
+    #
+    # eg: create_vault_instance secure-file-storage-kms region
+    ##
+    if check_exists "$(ibmcloud resource service-instance $1 2>&1)"; then
+        echo "Key Protect service named '$1' already exists"
+    else
+        ibmcloud resource service-instance-create $1 kms tiered-pricing $2 || exit 1
+    fi
+
+    KP_INSTANCE_ID=$(get_instance_id $1)
+    KP_GUID=$(get_guid $1)
+    echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
+    echo "KP_GUID=$KP_GUID"
+    check_value "$KP_INSTANCE_ID"
+    check_value "$KP_GUID"
+
+    if check_exists "$(ibmcloud resource service-key $1-acckey-$KP_GUID 2>&1)"; then
+        echo "Key Protect key already exists"
+    else
+        ibmcloud resource service-key-create $1-acckey-$KP_GUID Manager \
+            --instance-id "$KP_INSTANCE_ID" || exit 1
+    fi
+    
+    section "End: create_vault_instance: $1"
 }
 
 ## ----------------------------------------------------------------------------
@@ -327,19 +410,7 @@ function delete_vault_instance {
     # 
     ##
     
-    section "delete_vault_instance: $KP_SERVICE_NAME"
-}
-
-## ----------------------------------------------------------------------------
-
-function delete_key {
-    ##
-    # delete_key $KEY_ID
-    ##
-    
-    section "delete_key: $1"
-
-
+    section "Begin: delete_vault_instance: $KP_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
