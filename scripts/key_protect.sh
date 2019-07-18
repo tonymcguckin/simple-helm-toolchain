@@ -263,6 +263,18 @@ function save_key {
     echo "$KEY_ID"
     echo "-----------------"
 
+    # retrieve the specific key itself...
+    KP_KEYS=$(curl -s ${KP_MANAGEMENT_URL}/${KEY_ID} \
+    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $KP_GUID")
+    check_value $KP_KEYS
+    RETRIEVED_KEY_MATERIAL=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'") | .payload')
+    check_value $RETRIEVED_KEY_MATERIAL
+    echo "-----------------"
+    echo "New (or refetched) Standard Key named '${KEY_NAME}' has key material:"
+    echo "$RETRIEVED_KEY_MATERIAL"
+    echo "-----------------"
+
     section "End: save_key: $KP_SERVICE_NAME"
 }
 
