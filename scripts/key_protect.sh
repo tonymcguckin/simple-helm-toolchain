@@ -218,7 +218,7 @@ function save_key {
     echo "-----------------"
 
     # now check if the we're trying to save a key that already preexists...
-    if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}")' > /dev/null; then
+    if echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'$KEY_NAME'")' > /dev/null; then
         echo "Reusing saved key '${KEY_NAME}' as it already exists..."
     else
         DATA='{
@@ -228,9 +228,9 @@ function save_key {
             },
             "resources": [
               {
-                "name": "${KEY_NAME}",
+                "name": "'${KEY_NAME}'",
                 "type": "application/vnd.ibm.kms.key+json",
-                "payload": "$KEY_MATERIAL",
+                "payload": "'$KEY_MATERIAL'",
                 "extractable": true
               }
             ]
@@ -265,7 +265,7 @@ function save_key {
     fi
 
     # extract the id of our saved key...
-    KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="${KEY_NAME}") | .id')
+    KEY_ID=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'$KEY_NAME'") | .id')
     echo "KEY_ID=$KEY_ID"
 
     section "End: save_key: $KP_SERVICE_NAME"
