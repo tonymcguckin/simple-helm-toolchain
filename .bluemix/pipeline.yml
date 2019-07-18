@@ -87,7 +87,6 @@ stages:
           "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
         )
 
-
       echo "### ---------------------------------------------------------"
 
       echo "BYOK_ID for secret is ${BYOK_ID}"

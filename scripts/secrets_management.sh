@@ -136,7 +136,7 @@ function save_byok_secret {
       NEW_VAULT_SECRET=$(curl -s -X POST $VAULT_MANAGEMENT_URL \
         --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
         --header "Bluemix-Instance: $VAULT_GUID" \
-        --header "Prefer: return=representation" \
+        --header "Prefer: return=minimal" \
         --header "Content-Type: application/vnd.ibm.kms.key+json" \
         -d '{
           "metadata": {
@@ -285,7 +285,7 @@ function generate_auto_secret {
       NEW_VAULT_SECRET=$(curl -s -X POST $VAULT_MANAGEMENT_URL \
         --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
         --header "Bluemix-Instance: $VAULT_GUID" \
-        --header "Prefer: return=representation" \
+        --header "Prefer: return=minimal" \
         --header "Content-Type: application/vnd.ibm.kms.key+json" \
         -d '{
           "metadata": {
@@ -498,13 +498,19 @@ function delete_secret {
     # extract the id of our newly saved (or refetched) auto secret...
     VAULT_SECRET_ID=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .id')
     check_value $VAULT_SECRET_ID
-    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has public facing ID:"
+    echo "Fetched vault secret named '${SECRET_NAME}' (for deletion) has public facing ID:"
     echo "$VAULT_SECRET_ID"
     echo "-----------------"
 
+    # delete the specific vault secret itself...
+    DELETE_SECRET_RESPONSE=$(curl -s -X DELETE ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $DELETE_SECRET_RESPONSE
+
     section "End: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    echo 0
+    echo $DELETE_SECRET_RESPONSE
 }
 
 ## ----------------------------------------------------------------------------
