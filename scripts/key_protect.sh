@@ -235,6 +235,7 @@ function save_key {
           "resources": [
             {
               "name": "'${KEY_NAME}'",
+              "description": "'${KEY_NAME}'",
               "type": "application/vnd.ibm.kms.key+json",
               "payload": "'${KEY_MATERIAL}'",
               "extractable": true
@@ -270,8 +271,7 @@ function save_key {
     check_value $KP_KEYS
     RETRIEVED_KEY_MATERIAL=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'") | .payload')
     check_value $RETRIEVED_KEY_MATERIAL
-    echo "-----------------"
-    echo "New (or refetched) Standard Key named '${KEY_NAME}' has key material:"
+    echo "New (or refetched) Standard Key named '${KEY_NAME}' has Base64 Key Material:"
     echo "$RETRIEVED_KEY_MATERIAL"
     echo "-----------------"
 
