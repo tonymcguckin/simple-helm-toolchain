@@ -18,7 +18,13 @@ stages:
     type: text
   - name: DOCKER_FILE
     value: Dockerfile
-    type: text  
+    type: text
+  - name: VAULT_SERVICE_NAME
+    value: .
+    type: text
+  - name: RESOURCE_GROUP
+    value: .
+    type: text
   jobs:
   - name: Pre-build check
     type: builder
@@ -46,8 +52,6 @@ stages:
       echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
       echo "RESOURCE_GROUP=${RESOURCE_GROUP}"
 
-      echo "### ---------------------------------------------------------"
-
       ##
       # import the Secrets Management scripting library into this scope...
       #
@@ -68,34 +72,28 @@ stages:
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      BYOK_VALUE=$(
-        retrieve_secret \
-          "tmgkp1" \
-          "us-south" \
-          "devex-playground" \
-          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-        )
+      #BYOK_VALUE=$(
+      #  retrieve_secret \
+      #    "tmgkp1" \
+      #    "us-south" \
+      #    "devex-playground" \
+      #    "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+      #  )
 
       ##
       # delete the following named secret from the secrets management vault...
       #
-      DELETE_RESPONSE=$(
-        delete_secret \
-          "tmgkp1" \
-          "us-south" \
-          "devex-playground" \
-          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-        )
-
-      echo "### ---------------------------------------------------------"
+      #DELETE_RESPONSE=$(
+      #  delete_secret \
+      #    "tmgkp1" \
+      #    "us-south" \
+      #    "devex-playground" \
+      #    "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+      #  )
 
       echo "BYOK_ID for secret is ${BYOK_ID}"
-      echo "BYOK_VALUE for secret is ${BYOK_VALUE}"
-      echo "DELETE_RESPONSE for secret is ${DELETE_RESPONSE}"
-
-      echo "### ---------------------------------------------------------"
-
-      env
+      #echo "BYOK_VALUE for secret is ${BYOK_VALUE}"
+      #echo "DELETE_RESPONSE for secret is ${DELETE_RESPONSE}"
 
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
@@ -299,6 +297,24 @@ stages:
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_vulnerabilities.sh
       # Input env variables (can be received via a pipeline environment properties.file.
+
+      ##
+      # import the Secrets Management scripting library into this scope...
+      #
+      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+
+      ##
+      # retrieve the following named secret from the secrets management vault...
+      #
+      BYOK_VALUE=$(
+        retrieve_secret \
+          "tmgkp1" \
+          "us-south" \
+          "devex-playground" \
+          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+        )
+
+      echo "BYOK_VALUE for secret is ${BYOK_VALUE}"
 
       # View build properties
       if [ -f build.properties ]; then 
@@ -727,3 +743,35 @@ stages:
         fi
         echo -e "VIEW THE APPLICATION AT: http://${IP_ADDR}:${PORT}"
       fi
+- name: Delete Vault and Secrets
+  triggers:
+  - type: stage
+    enabled: false
+  jobs:
+  - name: Delete Vault Secret
+    type: deployer
+    target:
+      region_id: ${REGISTRY_REGION_ID}
+      api_key: ${API_KEY}
+    namespace: ${REGISTRY_NAMESPACE}
+    image_name: ${CF_APP_NAME}
+    script: |
+      #!/bin/bash
+
+      ##
+      # import the Secrets Management scripting library into this scope...
+      #
+      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+
+      ##
+      # delete the following named secret from the secrets management vault...
+      #
+      DELETE_RESPONSE=$(
+        delete_secret \
+          "tmgkp1" \
+          "us-south" \
+          "devex-playground" \
+          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+        )
+
+      echo "DELETE_RESPONSE for secret is ${DELETE_RESPONSE}"
