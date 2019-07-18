@@ -11,126 +11,131 @@
 #
 # vault instance management:
 #
-#   get_vault_instance      :: $KP_SERVICE_NAME $RESOURCE_GROUP
-#   delete_vault_instance   :: $KP_SERVICE_NAME $RESOURCE_GROUP
+#   get_vault_instance      :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP
+#   delete_vault_instance   :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP
 #
 ###
 #
 # iam authentication management:
 #
-#   iam_writer_access       :: $KP_SERVICE_NAME $KP_GUID $SERVICE_ID
+#   iam_writer_access       :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP
 #
 ###
 #
 # secret management:
 #
-#   save_key                :: $KP_SERVICE_NAME $KEY_NAME $KEY_MATERIAL $RESOURCE_GROUP
-#   retrieve_key            :: $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
-#   delete_key              :: $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
+#   save_byok_secret        :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME $SECRET_MATERIAL
+#   generate_auto_secret    :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME $EXTRACTABLE
+#   retrieve_secret         :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME
+#   delete_secret           :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME
 #
 ## ----------------------------------------------------------------------------
 
-function save_key {
+function save_byok_secret {
     ##
-    # save_key $KP_SERVICE_NAME $KEY_NAME $KEY_MATERIAL $RESOURCE_GROUP
+    # save_byok_secret $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME $SECRET_MATERIAL
     #
 
     ##
     # Typical usage:
     # --------------
     #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
-    #save_key \
-    #  "tmgkp1" \
-    #  "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-    #  "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=" \
-    #  "devex-playground"
+    #save_byok_secret \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group" \
+    #  "my_secret_name" \
+    #  "LS0tLS1C...my_base64_encoded_secret_material...LQo="
 
-    KP_SERVICE_NAME=$1
-    KEY_NAME=$2
-    KEY_MATERIAL=$3
-    RESOURCE_GROUP=$4
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
+    RESOURCE_GROUP=$3
+    SECRET_NAME=$4
+    SECRET_MATERIAL=$5
 
-    check_value $KP_SERVICE_NAME
-    check_value $KEY_NAME
-    check_value $KEY_MATERIAL
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
     check_value $RESOURCE_GROUP
+    check_value $SECRET_NAME
+    check_value $SECRET_MATERIAL
 
-    section "Begin: save_key: $KP_SERVICE_NAME"
+    section "Begin: save_byok_secret: $VAULT_SERVICE_NAME"
 
     ibmcloud target -g $RESOURCE_GROUP
 
-    REGION=$IBM_CLOUD_REGION
-    KP_MANAGEMENT_URL=https://$REGION.kms.cloud.ibm.com/api/v2/keys
-    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
-    KP_GUID=$(get_guid $KP_SERVICE_NAME)
-    KP_SERVICE_KEY_NAME=$KP_SERVICE_NAME-service-key-$KP_GUID
+    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
 
-    check_value $REGION
-    check_value $KP_MANAGEMENT_URL
-    check_value $KP_INSTANCE_ID
-    check_value $KP_GUID
-    check_value $KP_SERVICE_KEY_NAME
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
 
     ##
-    # create an instance of keyprotect if it's not already there...
+    # create an instance of the secrets management vault if it's not already there...
     ##
-    if check_exists "$(ibmcloud resource service-instance $KP_SERVICE_NAME 2>&1)"; then
-        echo "Reusing Key Protect service named '$KP_SERVICE_NAME' as it already exists..."
+    if check_exists "$(ibmcloud resource service-instance $VAULT_SERVICE_NAME 2>&1)"; then
+        echo "Reusing secrets management vault service named '$VAULT_SERVICE_NAME' as it already exists..."
     else
-        echo "Creating new Key Protect service instance named '$KP_SERVICE_KEY_NAME'..."
-        ibmcloud resource service-instance-create $KP_SERVICE_NAME kms tiered-pricing $REGION || exit 1
+        echo "Creating new secrets management vault service instance named '$VAULT_SERVICE_NAME'..."
+        ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
     fi
 
     ##
     # get or generate a service-key for keyprotect...
     # need this in order to work with iam to get credentials...
     ##
-    if check_exists "$(ibmcloud resource service-key $KP_SERVICE_KEY_NAME 2>&1)"; then
-        echo "Reusing Key Protect service-key '$KP_SERVICE_KEY_NAME' as it already exists..."
+    if check_exists "$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME 2>&1)"; then
+        echo "Reusing secrets management vault service-key '$VAULT_SERVICE_SERVICE_KEY_NAME' as it already exists..."
     else
-        echo "Creating new Key Protect service-key '$KP_SERVICE_KEY_NAME'..."
-        ibmcloud resource service-key-create $KP_SERVICE_KEY_NAME Manager \
-            --instance-id "$KP_INSTANCE_ID" || exit 1
+        echo "Creating new secrets management vault service-key '$VAULT_SERVICE_SERVICE_KEY_NAME'..."
+        ibmcloud resource service-key-create $VAULT_SERVICE_SERVICE_KEY_NAME Manager \
+            --instance-id "$VAULT_INSTANCE_ID" || exit 1
     fi
 
-    KP_CREDENTIALS=$(ibmcloud resource service-key $KP_SERVICE_KEY_NAME --output JSON)
-    check_value $KP_CREDENTIALS
-    KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
-    check_value $KP_IAM_APIKEY
-    KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
-    check_value $KP_ACCESS_TOKEN
-
-    echo "KP_SERVICE_NAME=$KP_SERVICE_NAME"
-    echo "REGION=$REGION"
-    echo "KP_MANAGEMENT_URL=$KP_MANAGEMENT_URL"
-    echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
-    echo "KP_GUID=$KP_GUID"
-    echo "KP_SERVICE_KEY_NAME=$KP_SERVICE_KEY_NAME"
-    echo "KP_CREDENTIALS=$KP_CREDENTIALS"
-    echo "KP_IAM_APIKEY=$KP_IAM_APIKEY"
-    echo "KP_ACCESS_TOKEN=$KP_ACCESS_TOKEN"
-    echo "KEY_NAME=$KEY_NAME"
-    echo "KEY_MATERIAL=$KEY_MATERIAL"
-
-    # get a list of keys on this kp instance first...
-    KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
-    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $KP_GUID")
-    check_value $KP_KEYS
+    VAULT_CREDENTIALS=$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME --output JSON)
+    check_value $VAULT_CREDENTIALS
+    VAULT_IAM_APIKEY=$(echo "$VAULT_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    check_value $VAULT_IAM_APIKEY
+    VAULT_ACCESS_TOKEN=$(get_access_token $VAULT_IAM_APIKEY)
+    check_value $VAULT_ACCESS_TOKEN
 
     echo "-----------------"
-    echo "Current list of Keys:"
-    echo "$KP_KEYS"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_MANAGEMENT_URL=$VAULT_MANAGEMENT_URL"
+    echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+    echo "VAULT_GUID=$VAULT_GUID"
+    echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+    echo "-----------------"
+    echo "VAULT_CREDENTIALS=$VAULT_CREDENTIALS"
+    echo "VAULT_IAM_APIKEY=$VAULT_IAM_APIKEY"
+    echo "VAULT_ACCESS_TOKEN=$VAULT_ACCESS_TOKEN"
+    echo "-----------------"
+    echo "SECRET_NAME=$SECRET_NAME"
+    echo "SECRET_MATERIAL=$SECRET_MATERIAL"
     echo "-----------------"
 
-    # now check if the we're trying to save a key that already preexists...
-    if echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'")' > /dev/null; then
-      echo "Reusing saved Standard Key named '${KEY_NAME}' as it already exists..."
+    # get a list of secrets on this vault secrets management instance first...
+    VAULT_SECRETS=$(curl -s $VAULT_MANAGEMENT_URL \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+
+    echo "Current list of vault secrets:"
+    echo "$VAULT_SECRETS"
+    echo "-----------------"
+
+    # now check if the we're trying to save a secret that already preexists...
+    if echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'")' > /dev/null; then
+      echo "Reusing saved vault BYOK secret named '${SECRET_NAME}' as it already exists..."
     else
-      echo "Creating new Standard Key named '$KEY_NAME' with specified key material..."
-      NEW_KP_KEY=$(curl -s -X POST $KP_MANAGEMENT_URL \
-        --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-        --header "Bluemix-Instance: $KP_GUID" \
+      echo "Creating new vault BYOK secret named '$SECRET_NAME' with specified secret material..."
+      NEW_VAULT_SECRET=$(curl -s -X POST $VAULT_MANAGEMENT_URL \
+        --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+        --header "Bluemix-Instance: $VAULT_GUID" \
         --header "Prefer: return=representation" \
         --header "Content-Type: application/vnd.ibm.kms.key+json" \
         -d '{
@@ -140,144 +145,358 @@ function save_key {
           },
           "resources": [
             {
-              "name": "'${KEY_NAME}'",
-              "description": "'${KEY_NAME}'",
+              "name": "'${SECRET_NAME}'",
+              "description": "'${SECRET_NAME}'",
               "type": "application/vnd.ibm.kms.key+json",
-              "payload": "'${KEY_MATERIAL}'",
+              "payload": "'${SECRET_MATERIAL}'",
               "extractable": true
             }
           ]
         }')
-      check_value $NEW_KP_KEY
+      check_value $NEW_VAULT_SECRET
 
-      echo "-----------------"
-      echo "New Standard Key named '${KEY_NAME}' creation response from Key Protect:"
-      echo "$NEW_KP_KEY"
+      echo "New vault BYOK secret named '${SECRET_NAME}' creation response from secrets management vault service:"
+      echo "$NEW_VAULT_SECRET"
       echo "-----------------"
 
-      # retrieve the updated keys list...
-      KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
-      --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-      --header "Bluemix-Instance: $KP_GUID")
-      check_value $KP_KEYS
+      # retrieve the updated secrets list...
+      VAULT_SECRETS=$(curl -s $VAULT_MANAGEMENT_URL \
+      --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+      --header "Bluemix-Instance: $VAULT_GUID")
+      check_value $VAULT_SECRETS
     fi
 
-    # extract the id of our newly saved (or refetched) key...
-    KEY_ID=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'") | .id')
-    check_value $KEY_ID
-    echo "New (or refetched) Standard Key named '${KEY_NAME}' has public facing ID:"
-    echo "$KEY_ID"
+    # extract the id of our newly saved (or refetched) secret...
+    VAULT_SECRET_ID=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .id')
+    check_value $VAULT_SECRET_ID
+    echo "New (or refetched) vault BYOK secret named '${SECRET_NAME}' has public facing ID:"
+    echo "$VAULT_SECRET_ID"
     echo "-----------------"
 
-    # retrieve the specific key itself...
-    KP_KEYS=$(curl -s ${KP_MANAGEMENT_URL}/${KEY_ID} \
-    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $KP_GUID")
-    check_value $KP_KEYS
-    RETRIEVED_KEY_MATERIAL=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'") | .payload')
-    check_value $RETRIEVED_KEY_MATERIAL
-    echo "New (or refetched) Standard Key named '${KEY_NAME}' has Base64 Key Material:"
-    echo "$RETRIEVED_KEY_MATERIAL"
+    # retrieve the specific vault secret itself...
+    VAULT_SECRETS=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
+    check_value $RETRIEVED_SECRET_MATERIAL
+    echo "New (or refetched) vault BYOK secret named '${SECRET_NAME}' has Base64 Key Material:"
+    echo "$RETRIEVED_SECRET_MATERIAL"
     echo "-----------------"
 
-    section "End: save_key: $KP_SERVICE_NAME"
+    section "End: save_byok_secret: $VAULT_SERVICE_NAME"
+
+    echo $VAULT_SECRET_ID
+}
+
+## ----------------------------------------------------------------------------
+
+function generate_auto_secret {
+    ##
+    # generate_auto_secret $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME $EXTRACTABLE
+    #
+
+    ##
+    # Typical usage:
+    # --------------
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #generate_auto_secret \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group" \
+    #  "my_secret_name" \
+    #  false
+
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
+    RESOURCE_GROUP=$3
+    SECRET_NAME=$4
+    EXTRACTABLE=$5
+
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
+    check_value $RESOURCE_GROUP
+    check_value $SECRET_NAME
+    check_value $EXTRACTABLE
+
+    section "Begin: generate_auto_secret: $VAULT_SERVICE_NAME"
+
+    ibmcloud target -g $RESOURCE_GROUP
+
+    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
+
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
+
+    ##
+    # create an instance of the secrets management vault if it's not already there...
+    ##
+    if check_exists "$(ibmcloud resource service-instance $VAULT_SERVICE_NAME 2>&1)"; then
+        echo "Reusing secrets management vault service named '$VAULT_SERVICE_NAME' as it already exists..."
+    else
+        echo "Creating new secrets management vault service instance named '$VAULT_SERVICE_NAME'..."
+        ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
+    fi
+
+    ##
+    # get or generate a service-key for keyprotect...
+    # need this in order to work with iam to get credentials...
+    ##
+    if check_exists "$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME 2>&1)"; then
+        echo "Reusing secrets management vault service-key '$VAULT_SERVICE_SERVICE_KEY_NAME' as it already exists..."
+    else
+        echo "Creating new secrets management vault service-key '$VAULT_SERVICE_SERVICE_KEY_NAME'..."
+        ibmcloud resource service-key-create $VAULT_SERVICE_SERVICE_KEY_NAME Manager \
+            --instance-id "$VAULT_INSTANCE_ID" || exit 1
+    fi
+
+    VAULT_CREDENTIALS=$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME --output JSON)
+    check_value $VAULT_CREDENTIALS
+    VAULT_IAM_APIKEY=$(echo "$VAULT_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    check_value $VAULT_IAM_APIKEY
+    VAULT_ACCESS_TOKEN=$(get_access_token $VAULT_IAM_APIKEY)
+    check_value $VAULT_ACCESS_TOKEN
+
+    echo "-----------------"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_MANAGEMENT_URL=$VAULT_MANAGEMENT_URL"
+    echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+    echo "VAULT_GUID=$VAULT_GUID"
+    echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+    echo "-----------------"
+    echo "VAULT_CREDENTIALS=$VAULT_CREDENTIALS"
+    echo "VAULT_IAM_APIKEY=$VAULT_IAM_APIKEY"
+    echo "VAULT_ACCESS_TOKEN=$VAULT_ACCESS_TOKEN"
+    echo "-----------------"
+    echo "SECRET_NAME=$SECRET_NAME"
+    echo "EXTRACTABLE=$EXTRACTABLE"
+    echo "-----------------"
+
+    # get a list of secrets on this vault secrets management service instance first...
+    VAULT_SECRETS=$(curl -s $VAULT_MANAGEMENT_URL \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+
+    echo "Current list of vault secrets:"
+    echo "$VAULT_SECRETS"
+    echo "-----------------"
+
+    # now check if the we're trying to save a key that already preexists...
+    if echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'")' > /dev/null; then
+      echo "Reusing saved vault auto secret named '${SECRET_NAME}' as it already exists..."
+    else
+      echo "Creating new vault auto secret named '$SECRET_NAME' with specified secret material..."
+      NEW_VAULT_SECRET=$(curl -s -X POST $VAULT_MANAGEMENT_URL \
+        --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+        --header "Bluemix-Instance: $VAULT_GUID" \
+        --header "Prefer: return=representation" \
+        --header "Content-Type: application/vnd.ibm.kms.key+json" \
+        -d '{
+          "metadata": {
+              "collectionType": "application/vnd.ibm.kms.key+json",
+              "collectionTotal": 1
+          },
+          "resources": [
+            {
+              "name": "'${SECRET_NAME}'",
+              "description": "'${SECRET_NAME}'",
+              "type": "application/vnd.ibm.kms.key+json",
+              "extractable": '${EXTRACTABLE}'
+            }
+          ]
+        }')
+      check_value $NEW_VAULT_SECRET
+
+      echo "New vault auto secret named '${SECRET_NAME}' creation response from secrets management vault service:"
+      echo "$NEW_VAULT_SECRET"
+      echo "-----------------"
+
+      # retrieve the updated secrets list...
+      VAULT_SECRETS=$(curl -s $VAULT_MANAGEMENT_URL \
+      --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+      --header "Bluemix-Instance: $VAULT_GUID")
+      check_value $VAULT_SECRETS
+    fi
+
+    # extract the id of our newly saved (or refetched) auto secret...
+    VAULT_SECRET_ID=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .id')
+    check_value $VAULT_SECRET_ID
+    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has public facing ID:"
+    echo "$VAULT_SECRET_ID"
+    echo "-----------------"
+
+    # retrieve the specific vault secret itself...
+    VAULT_SECRETS=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
+    check_value $RETRIEVED_SECRET_MATERIAL
+    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has Base64 Key Material:"
+    echo "$RETRIEVED_SECRET_MATERIAL"
+    echo "-----------------"
+
+    section "End: generate_auto_secret: $VAULT_SERVICE_NAME"
+
+    echo $VAULT_SECRET_ID
 }
 
 ## ----------------------------------------------------------------------------
 
 function retrieve_key {
     ##
-    # retrieve_key $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
+    # retrieve_secret $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME
     #
 
     ##
     # Typical usage:
     # --------------
     #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
-    #retrieve_key \
-    #  "tmgkp1" \
-    #  "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-    #  "devex-playground"
+    #retrieve_secret \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group" \
+    #  "my_secret_name"
 
-    KP_SERVICE_NAME=$1
-    KEY_NAME=$2
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
     RESOURCE_GROUP=$3
+    SECRET_NAME=$4
 
-    check_value $KP_SERVICE_NAME
-    check_value $KEY_NAME
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
     check_value $RESOURCE_GROUP
+    check_value $SECRET_NAME
 
-    section "Begin: retrieve_key: $KP_SERVICE_NAME"
+    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME"
 
     ibmcloud target -g $RESOURCE_GROUP
 
-    REGION=$IBM_CLOUD_REGION
-    KP_MANAGEMENT_URL=https://$REGION.kms.cloud.ibm.com/api/v2/keys
-    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
-    KP_GUID=$(get_guid $KP_SERVICE_NAME)
-    KP_SERVICE_KEY_NAME=$KP_SERVICE_NAME-service-key-$KP_GUID
+    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
 
-    check_value $REGION
-    check_value $KP_MANAGEMENT_URL
-    check_value $KP_INSTANCE_ID
-    check_value $KP_GUID
-    check_value $KP_SERVICE_KEY_NAME
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
 
-    
+    VAULT_CREDENTIALS=$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME --output JSON)
+    check_value $VAULT_CREDENTIALS
+    VAULT_IAM_APIKEY=$(echo "$VAULT_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    check_value $VAULT_IAM_APIKEY
+    VAULT_ACCESS_TOKEN=$(get_access_token $VAULT_IAM_APIKEY)
+    check_value $VAULT_ACCESS_TOKEN
 
-    section "End: retrieve_key: $KP_SERVICE_NAME"
+    echo "-----------------"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_MANAGEMENT_URL=$VAULT_MANAGEMENT_URL"
+    echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+    echo "VAULT_GUID=$VAULT_GUID"
+    echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+    echo "-----------------"
+    echo "VAULT_CREDENTIALS=$VAULT_CREDENTIALS"
+    echo "VAULT_IAM_APIKEY=$VAULT_IAM_APIKEY"
+    echo "VAULT_ACCESS_TOKEN=$VAULT_ACCESS_TOKEN"
+    echo "-----------------"
+    echo "SECRET_NAME=$SECRET_NAME"
+    echo "-----------------"
+
+    # get a list of secrets on this vault secrets management service instance first...
+    VAULT_SECRETS=$(curl -s $VAULT_MANAGEMENT_URL \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+
+    echo "Current list of vault secrets:"
+    echo "$VAULT_SECRETS"
+    echo "-----------------"
+
+    # extract the id of our newly saved (or refetched) auto secret...
+    VAULT_SECRET_ID=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .id')
+    check_value $VAULT_SECRET_ID
+    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has public facing ID:"
+    echo "$VAULT_SECRET_ID"
+    echo "-----------------"
+
+    # retrieve the specific vault secret itself...
+    VAULT_SECRETS=$(curl -s ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
+    --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
+    --header "Bluemix-Instance: $VAULT_GUID")
+    check_value $VAULT_SECRETS
+    RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
+    check_value $RETRIEVED_SECRET_MATERIAL
+    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has Base64 Key Material:"
+    echo "$RETRIEVED_SECRET_MATERIAL"
+    echo "-----------------"
+
+    section "End: retrieve_secret: $VAULT_SERVICE_NAME"
+
+    echo $RETRIEVED_SECRET_MATERIAL
 }
 
 ## ----------------------------------------------------------------------------
 
 function delete_key {
     ##
-    # delete_key $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
+    # delete_secret $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SECRET_NAME
     #
 
     ##
     # Typical usage:
     # --------------
     #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
-    #delete_key \
-    #  "tmgkp1" \
-    #  "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-    #  "devex-playground"
+    #delete_secret \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group" \
+    #  "my_secret_name"
 
-    KP_SERVICE_NAME=$1
-    KEY_NAME=$2
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
     RESOURCE_GROUP=$3
+    SECRET_NAME=$4
 
-    check_value $KP_SERVICE_NAME
-    check_value $KEY_NAME
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
     check_value $RESOURCE_GROUP
+    check_value $SECRET_NAME
 
-    section "Begin: delete_key: $KP_SERVICE_NAME"
+    section "Begin: delete_secret: $VAULT_SERVICE_NAME"
 
     ibmcloud target -g $RESOURCE_GROUP
 
-    REGION=$IBM_CLOUD_REGION
-    KP_MANAGEMENT_URL=https://$REGION.kms.cloud.ibm.com/api/v2/keys
-    KP_INSTANCE_ID=$(get_instance_id $KP_SERVICE_NAME)
-    KP_GUID=$(get_guid $KP_SERVICE_NAME)
-    KP_SERVICE_KEY_NAME=$KP_SERVICE_NAME-service-key-$KP_GUID
+    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
 
-    check_value $REGION
-    check_value $KP_MANAGEMENT_URL
-    check_value $KP_INSTANCE_ID
-    check_value $KP_GUID
-    check_value $KP_SERVICE_KEY_NAME
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
 
     
 
-    section "End: delete_key: $KP_SERVICE_NAME"
+    section "End: delete_secret: $VAULT_SERVICE_NAME"
+
+    echo 0
 }
 
 ## ----------------------------------------------------------------------------
 
 function assign_iam_writer_access_for_service {
     ##
-    # assign_iam_writer_access_for_service $KP_SERVICE_NAME $KP_GUID $SERVICE_ID
+    # assign_iam_writer_access_for_service $VAULT_SERVICE_NAME $VAULT_GUID $SERVICE_ID
     #
     
     section "Begin: assign_iam_writer_access_for_service: $1"
@@ -288,15 +507,15 @@ function assign_iam_writer_access_for_service {
 
     # Create a policy to make serviceID a writer for Key Protect
     if echo "$EXISTING_POLICIES" | \
-    jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$KP_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
+    jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$VAULT_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
         echo "Writer policy on Key Protect already exist for the Service ID"
     else
-        ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $KP_GUID --force
+        ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $VAULT_GUID --force
     fi
 
-    KP_CREDENTIALS=$(ibmcloud resource service-key $1-acckey-$KP_GUID --output JSON)
-    KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
-    KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
+    VAULT_CREDENTIALS=$(ibmcloud resource service-key $1-acckey-$VAULT_GUID --output JSON)
+    VAULT_IAM_APIKEY=$(echo "$VAULT_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    VAULT_ACCESS_TOKEN=$(get_access_token $VAULT_IAM_APIKEY)
 
     section "End: assign_iam_writer_access_for_service: $1"
 }
@@ -313,9 +532,9 @@ function get_vault_instance {
     section "Begin: create_vault_instance: $1"
     
     #
-    # create_vault_instance service-name region
+    # create_vault_instance service-name VAULT_REGION
     #
-    # eg: create_vault_instance secure-file-storage-kms region
+    # eg: create_vault_instance secure-file-storage-kms VAULT_REGION
     ##
     if check_exists "$(ibmcloud resource service-instance $1 2>&1)"; then
         echo "Key Protect service named '$1' already exists"
@@ -323,18 +542,18 @@ function get_vault_instance {
         ibmcloud resource service-instance-create $1 kms tiered-pricing $2 || exit 1
     fi
 
-    KP_INSTANCE_ID=$(get_instance_id $1)
-    KP_GUID=$(get_guid $1)
-    echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
-    echo "KP_GUID=$KP_GUID"
-    check_value "$KP_INSTANCE_ID"
-    check_value "$KP_GUID"
+    VAULT_INSTANCE_ID=$(get_instance_id $1)
+    VAULT_GUID=$(get_guid $1)
+    echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+    echo "VAULT_GUID=$VAULT_GUID"
+    check_value "$VAULT_INSTANCE_ID"
+    check_value "$VAULT_GUID"
 
-    if check_exists "$(ibmcloud resource service-key $1-acckey-$KP_GUID 2>&1)"; then
+    if check_exists "$(ibmcloud resource service-key $1-acckey-$VAULT_GUID 2>&1)"; then
         echo "Key Protect key already exists"
     else
-        ibmcloud resource service-key-create $1-acckey-$KP_GUID Manager \
-            --instance-id "$KP_INSTANCE_ID" || exit 1
+        ibmcloud resource service-key-create $1-acckey-$VAULT_GUID Manager \
+            --instance-id "$VAULT_INSTANCE_ID" || exit 1
     fi
     
     section "End: create_vault_instance: $1"
@@ -347,7 +566,7 @@ function delete_vault_instance {
     # 
     ##
     
-    section "Begin: delete_vault_instance: $KP_SERVICE_NAME"
+    section "Begin: delete_vault_instance: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
