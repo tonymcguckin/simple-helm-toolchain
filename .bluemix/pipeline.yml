@@ -52,7 +52,7 @@ stages:
       source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
 
       ##
-      # save the following base64 secret data into keyprotect...
+      # save the following named secret and specified base64 data into keyprotect...
       #
       save_key \
         "tmgkp1" \
@@ -61,7 +61,7 @@ stages:
         "devex-playground"
 
       ##
-      # retrieve the following secret from keyprotect...
+      # retrieve the following named secret from keyprotect...
       #
       retrieve_key \
         "tmgkp1" \
@@ -69,7 +69,7 @@ stages:
         "devex-playground"
 
       ##
-      # delete the following secret from keyprotect...
+      # delete the following named secret from keyprotect...
       #
       delete_key \
         "tmgkp1" \

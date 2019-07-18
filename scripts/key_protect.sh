@@ -2,95 +2,32 @@
 
 ## ----------------------------------------------------------------------------
 #
-# Key Protect API:
+# Secrets Management Script Library API:
+#
+###
+# @author: tony.mcguckin@ie.ibm.com
+# @copyright: IBM Corporation 2019
+###
+#
+# vault instance management:
+#
+#   get_vault_instance      :: $KP_SERVICE_NAME $RESOURCE_GROUP
+#   delete_vault_instance   :: $KP_SERVICE_NAME $RESOURCE_GROUP
 #
 ###
 #
-# kp instance management:
+# iam authentication management:
 #
-#   create_vault_instance                   :: $KP_SERVICE_NAME $REGION
-#   retrieve_vault_instance                 :: $KP_SERVICE_NAME $KP_GUID $REGION
-#   update_vault_instance                   :: $KP_SERVICE_NAME $KP_GUID $REGION
-#   delete_vault_instance                   :: $KP_SERVICE_NAME $KP_GUID $REGION
+#   iam_writer_access       :: $KP_SERVICE_NAME $KP_GUID $SERVICE_ID
 #
 ###
 #
-# iam cross authenticate an integrated service with keyprotect:
+# secret management:
 #
-#   assign_iam_writer_access_for_service    :: $KP_SERVICE_NAME $KP_GUID $SERVICE_ID
+#   save_key                :: $KP_SERVICE_NAME $KEY_NAME $KEY_MATERIAL $RESOURCE_GROUP
+#   retrieve_key            :: $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
+#   delete_key              :: $KP_SERVICE_NAME $KEY_NAME $RESOURCE_GROUP
 #
-###
-#
-# key management:
-#
-#   get_root_key                            :: $KP_SERVICE_NAME $KP_GUID $REGION $KP_ACCESS_TOKEN $MY_KEY_MATERIAL
-#   get_standard_key                        :: $KP_SERVICE_NAME $KP_GUID $REGION $KP_ACCESS_TOKEN $KP_GUID $MY_KEY_MATERIAL
-#   delete_key                              :: $KP_SERVICE_NAME $KP_GUID $REGION
-#
-## ----------------------------------------------------------------------------
-
-#source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
-#section "Pipeline YML calling Key Protect integration..."
-#echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
-#echo "VAULT_REGION=${VAULT_REGION}"
-#ibmcloud target -g devex-playground
-#create_vault_instance "${VAULT_SERVICE_NAME}" "${VAULT_REGION}"
-#create_vault_instance "tmgkp1" "ibm:yp:us-south"
-#create_vault_instance "tmgkp1" "us-south"
-#section "Begin: create_vault_instance: tmgkp1"
-#
-#if check_exists "$(ibmcloud resource service-instance tmgkp1 2>&1)"; then
-#    echo "Key Protect service named 'tmgkp1' already exists"
-#else
-#    ibmcloud resource service-instance-create tmgkp1 kms tiered-pricing us-south || exit 1
-#fi
-#
-#KP_INSTANCE_ID=$(get_instance_id tmgkp1)
-#KP_GUID=$(get_guid tmgkp1)
-#echo "KP_INSTANCE_ID=$KP_INSTANCE_ID"
-#echo "KP_GUID=$KP_GUID"
-#check_value "$KP_INSTANCE_ID"
-#check_value "$KP_GUID"
-#
-#if check_exists "$(ibmcloud resource service-key tmgkp1-acckey-$KP_GUID 2>&1)"; then
-#    echo "Key Protect key already exists"
-#else
-#    ibmcloud resource service-key-create tmgkp1-acckey-$KP_GUID Manager \
-#        --instance-id "$KP_INSTANCE_ID" || exit 1
-#fi
-#
-#KP_CREDENTIALS=$(ibmcloud resource service-key tmgkp1-acckey-$KP_GUID --output JSON)
-#KP_IAM_APIKEY=$(echo "$KP_CREDENTIALS" | jq -r .[0].credentials.apikey)
-#KP_ACCESS_TOKEN=$(get_access_token $KP_IAM_APIKEY)
-#KP_MANAGEMENT_URL="https://us-south.kms.cloud.ibm.com/api/v2/keys"
-#KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
-#  --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-#  --header "Bluemix-Instance: $KP_GUID")
-#check_value "$KP_KEYS"
-#
-#echo "$KP_KEYS"
-#
-#if echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="docker_trust_private_key")' > /dev/null; then
-#  echo "Docker Trust private key already exists"
-#else
-#  KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
-#    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-#    --header "Bluemix-Instance: $KP_GUID" \
-#    --header "Content-Type: application/vnd.ibm.kms.key+json" -d @scripts/docker_trust_private_key.json)
-#fi
-#
-#DT_PRIVATE_KEY_ID=$(echo $KP_KEYS | jq -e -r '.resources[] | select(.name=="docker_trust_private_key") | .id')
-#echo "DT_PRIVATE_KEY_ID=$DT_PRIVATE_KEY_ID"
-#
-#DT_PRIVATE_KEY_VALUE=$(curl -s "${KP_MANAGEMENT_URL}/${DT_PRIVATE_KEY_ID}" \
-#    --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-#    --header "Bluemix-Instance: $KP_GUID" \
-#    --header "Accept: application/vnd.ibm.kms.key+json")
-#
-#echo "$DT_PRIVATE_KEY_VALUE"
-#
-#section "End: create_vault_instance: tmgkp1"
-
 ## ----------------------------------------------------------------------------
 
 function save_key {
@@ -264,7 +201,7 @@ function retrieve_key {
 
     KP_SERVICE_NAME=$1
     KEY_NAME=$2
-    RESOURCE_GROUP=$4
+    RESOURCE_GROUP=$3
 
     check_value $KP_SERVICE_NAME
     check_value $KEY_NAME
@@ -309,7 +246,7 @@ function delete_key {
 
     KP_SERVICE_NAME=$1
     KEY_NAME=$2
-    RESOURCE_GROUP=$4
+    RESOURCE_GROUP=$3
 
     check_value $KP_SERVICE_NAME
     check_value $KEY_NAME
