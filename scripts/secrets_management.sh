@@ -63,16 +63,6 @@ function save_byok_secret {
 
     ibmcloud target -g $RESOURCE_GROUP
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
-    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
-    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
-    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
-
-    check_value $VAULT_MANAGEMENT_URL
-    check_value $VAULT_INSTANCE_ID
-    check_value $VAULT_GUID
-    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
-
     ##
     # create an instance of the secrets management vault if it's not already there...
     ##
@@ -82,6 +72,16 @@ function save_byok_secret {
         echo "Creating new secrets management vault service instance named '$VAULT_SERVICE_NAME'..."
         ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
     fi
+
+    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
+
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
 
     ##
     # get or generate a service-key for keyprotect...
@@ -212,16 +212,6 @@ function generate_auto_secret {
 
     ibmcloud target -g $RESOURCE_GROUP
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
-    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
-    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
-    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
-
-    check_value $VAULT_MANAGEMENT_URL
-    check_value $VAULT_INSTANCE_ID
-    check_value $VAULT_GUID
-    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
-
     ##
     # create an instance of the secrets management vault if it's not already there...
     ##
@@ -231,6 +221,16 @@ function generate_auto_secret {
         echo "Creating new secrets management vault service instance named '$VAULT_SERVICE_NAME'..."
         ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
     fi
+
+    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
+
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
 
     ##
     # get or generate a service-key for keyprotect...
