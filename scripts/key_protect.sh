@@ -213,65 +213,57 @@ function save_key {
     check_value $KP_KEYS
 
     echo "-----------------"
-    echo "Key List (Before):"
-    echo "KP_KEYS=$KP_KEYS"
+    echo "Current list of Keys:"
+    echo "$KP_KEYS"
     echo "-----------------"
 
     # now check if the we're trying to save a key that already preexists...
-    if echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'$KEY_NAME'")' > /dev/null; then
-        echo "Reusing saved key '${KEY_NAME}' as it already exists..."
+    if echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'")' > /dev/null; then
+      echo "Reusing saved Standard Key named '${KEY_NAME}' as it already exists..."
     else
-        DATA='{
-            "metadata": {
-                "collectionType": "application/vnd.ibm.kms.key+json",
-                "collectionTotal": 1
-            },
-            "resources": [
-              {
-                "name": "'${KEY_NAME}'",
-                "type": "application/vnd.ibm.kms.key+json",
-                "payload": "'$KEY_MATERIAL'",
-                "extractable": true
-              }
-            ]
-          }'
+      echo "Creating new Standard Key named '$KEY_NAME' with specified key material..."
+      NEW_KP_KEY=$(curl -s -X POST $KP_MANAGEMENT_URL \
+        --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+        --header "Bluemix-Instance: $KP_GUID" \
+        --header "Prefer: return=representation" \
+        --header "Content-Type: application/vnd.ibm.kms.key+json" \
+        -d '{
+          "metadata": {
+              "collectionType": "application/vnd.ibm.kms.key+json",
+              "collectionTotal": 1
+          },
+          "resources": [
+            {
+              "name": "'${KEY_NAME}'",
+              "type": "application/vnd.ibm.kms.key+json",
+              "payload": "'${KEY_MATERIAL}'",
+              "extractable": true
+            }
+          ]
+        }')
+      check_value $NEW_KP_KEY
 
-        echo "DATA=$DATA"
+      echo "-----------------"
+      echo "New Standard Key named '${KEY_NAME}' creation response from Key Protect:"
+      echo "$NEW_KP_KEY"
+      echo "-----------------"
 
-        KP_KEYS=$(curl -s -X POST $KP_MANAGEMENT_URL \
-          --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
-          --header "Bluemix-Instance: $KP_GUID" \
-          --header "Prefer: return=representation" \
-          --header "Content-Type: application/vnd.ibm.kms.key+json" \
-          -d '{
-            "metadata": {
-                "collectionType": "application/vnd.ibm.kms.key+json",
-                "collectionTotal": 1
-            },
-            "resources": [
-              {
-                "name": "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96",
-                "type": "application/vnd.ibm.kms.key+json",
-                "payload": "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=",
-                "extractable": true
-              }
-            ]
-          }')
-
-        echo "-----------------"
-        echo "Key List (After):"
-        echo "KP_KEYS=$KP_KEYS"
-        echo "-----------------"
+      # retrieve the updated keys list...
+      KP_KEYS=$(curl -s $KP_MANAGEMENT_URL \
+      --header "Authorization: Bearer $KP_ACCESS_TOKEN" \
+      --header "Bluemix-Instance: $KP_GUID")
+      check_value $KP_KEYS
     fi
 
-    # extract the id of our saved key...
-    KEY_ID=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'$KEY_NAME'") | .id')
-    echo "KEY_ID=$KEY_ID"
+    # extract the id of our newly saved (or refetched) key...
+    KEY_ID=$(echo "$KP_KEYS" | jq -e -r '.resources[] | select(.name=="'${KEY_NAME}'") | .id')
+    check_value $KEY_ID
+    echo "-----------------"
+    echo "New (or refetched) Standard Key named '${KEY_NAME}' has public facing ID:"
+    echo "$KEY_ID"
+    echo "-----------------"
 
     section "End: save_key: $KP_SERVICE_NAME"
-
-    # return the new key id...
-    echo $KEY_ID
 }
 
 ## ----------------------------------------------------------------------------
