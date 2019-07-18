@@ -39,14 +39,13 @@ function save_byok_secret {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
     #save_byok_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
     #  "my_resource_group" \
     #  "my_secret_name" \
     #  "LS0tLS1C...my_base64_encoded_secret_material...LQo="
-    VAULT_SECRET_ID=$(
 
     VAULT_SERVICE_NAME=$1
     VAULT_REGION=$2
@@ -187,7 +186,6 @@ function save_byok_secret {
 
     section "End: save_byok_secret: $VAULT_SERVICE_NAME"
 
-    )
     echo $VAULT_SECRET_ID
 }
 
@@ -201,7 +199,7 @@ function generate_auto_secret {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
     #generate_auto_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
@@ -360,7 +358,7 @@ function retrieve_key {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
     #retrieve_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
@@ -456,7 +454,7 @@ function delete_key {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/key_protect.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
     #delete_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
