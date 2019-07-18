@@ -63,8 +63,7 @@ stages:
           "devex-playground" \
           "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
           "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=" \
-      )
-      echo "BYOK_ID=$BYOK_ID"
+        )
 
       ##
       # retrieve the following named secret from the secrets management vault...
@@ -72,21 +71,25 @@ stages:
       BYOK_VALUE=$(
         retrieve_secret \
           "tmgkp1" \
-          "devex-playground" \
           "us-south" \
+          "devex-playground" \
           "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-      )
-      echo "BYOK_VALUE=$BYOK_VALUE"
+        )
 
       ##
       # delete the following named secret from the secrets management vault...
       #
-      #DELETE_RESPONSE=delete_secret \
-      #  "tmgkp1" \
-      #  "us-south" \
-      #  "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96"
-      #  "devex-playground" \
-      #echo "DELETE_RESPONSE=$DELETE_RESPONSE"
+      DELETE_RESPONSE=$(
+        delete_secret \
+          "tmgkp1" \
+          "us-south" \
+          "devex-playground" \
+          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+        )
+
+      echo "BYOK_ID=$BYOK_ID"
+      echo "BYOK_VALUE=$BYOK_VALUE"
+      echo "DELETE_RESPONSE=$DELETE_RESPONSE"
 
       echo "### ---------------------------------------------------------"
 
