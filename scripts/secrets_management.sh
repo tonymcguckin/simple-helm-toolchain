@@ -402,7 +402,7 @@ function retrieve_secret {
     # extract the id of our newly saved (or refetched) auto secret...
     VAULT_SECRET_ID=$(echo "$VAULT_SECRETS" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .id')
     check_value $VAULT_SECRET_ID
-    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has public facing ID:"
+    echo "New (or refetched) vault secret named '${SECRET_NAME}' has public facing ID:"
     echo "$VAULT_SECRET_ID"
     echo "-----------------"
 
@@ -413,7 +413,7 @@ function retrieve_secret {
     check_value $VAULT_SECRET
     RETRIEVED_SECRET_MATERIAL=$(echo "$VAULT_SECRET" | jq -e -r '.resources[] | select(.name=="'${SECRET_NAME}'") | .payload')
     check_value $RETRIEVED_SECRET_MATERIAL
-    echo "New (or refetched) vault auto secret named '${SECRET_NAME}' has Base64 Key Material:"
+    echo "New (or refetched) vault secret named '${SECRET_NAME}' has Base64 Key Material:"
     echo "$RETRIEVED_SECRET_MATERIAL"
     echo "-----------------"
 
