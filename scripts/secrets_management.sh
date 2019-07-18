@@ -505,8 +505,9 @@ function delete_secret {
     # delete the specific vault secret itself...
     DELETE_SECRET_RESPONSE=$(curl -s -X DELETE ${VAULT_MANAGEMENT_URL}/${VAULT_SECRET_ID} \
     --header "Authorization: Bearer $VAULT_ACCESS_TOKEN" \
-    --header "Bluemix-Instance: $VAULT_GUID")
-    check_value $DELETE_SECRET_RESPONSE
+    --header "Bluemix-Instance: $VAULT_GUID" \
+    --header "Accept: application/vnd.ibm.kms.key+json")
+    #check_value $DELETE_SECRET_RESPONSE
 
     section "End: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
