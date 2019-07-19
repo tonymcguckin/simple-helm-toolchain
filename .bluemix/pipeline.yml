@@ -55,7 +55,7 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
 
       ##
       # save the following named secret and specified base64 data into the secrets management vault...
@@ -65,35 +65,11 @@ stages:
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+          "tmg-secret-name" \
           "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NTcUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVpJQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERKakZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONHRwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcrUFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQotLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=" \
         )
 
-      ##
-      # retrieve the following named secret from the secrets management vault...
-      #
-      #BYOK_VALUE=$(
-      #  retrieve_secret \
-      #    "tmg-secrets-vault" \
-      #    "us-south" \
-      #    "devex-playground" \
-      #    "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-      #  )
-
-      ##
-      # delete the following named secret from the secrets management vault...
-      #
-      #DELETE_RESPONSE=$(
-      #  delete_secret \
-      #    "tmg-secrets-vault" \
-      #    "us-south" \
-      #    "devex-playground" \
-      #    "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
-      #  )
-
       echo "BYOK_ID for secret is ${BYOK_ID}"
-      #echo "BYOK_VALUE for secret is ${BYOK_VALUE}"
-      #echo "DELETE_RESPONSE for secret is ${DELETE_RESPONSE}"
 
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
@@ -301,7 +277,7 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
 
       ##
       # retrieve the following named secret from the secrets management vault...
@@ -311,7 +287,7 @@ stages:
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+          "tmg-secret-name" \
         )
 
       echo "BYOK_VALUE for secret is ${BYOK_VALUE}"
@@ -767,7 +743,7 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
 
       ##
       # delete the following named secret from the secrets management vault...
@@ -777,7 +753,7 @@ stages:
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96" \
+          "tmg-secret-name" \
         )
 
       echo "DELETE_RESPONSE for secret is ${DELETE_RESPONSE}"
