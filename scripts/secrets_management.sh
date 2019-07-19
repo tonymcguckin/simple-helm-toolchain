@@ -1,4 +1,12 @@
 #!/bin/bash
+# uncomment to debug the script
+# set -x
+# copy the script below into your app code repo (e.g. ./scripts/secrets_management.sh) and 'source' it from your pipeline job
+#    source ./scripts/secrets_management.sh
+# alternatively, you can source it from online script:
+#    source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+# ------------------
+# source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh
 
 ## ----------------------------------------------------------------------------
 #
@@ -18,7 +26,7 @@
 #
 # iam authentication management:
 #
-#   iam_writer_access       :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP
+#   iam_writer_access       :: $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SOURCE_SERVICE_NAME $SOURCE_SERVICE_GUID
 #
 ###
 #
@@ -39,7 +47,7 @@ function save_byok_secret {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
     #save_byok_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
@@ -188,7 +196,7 @@ function generate_auto_secret {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
     #generate_auto_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
@@ -336,7 +344,7 @@ function retrieve_secret {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
     #retrieve_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
@@ -432,7 +440,7 @@ function delete_secret {
     ##
     # Typical usage:
     # --------------
-    #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
     #delete_secret \
     #  "my_key_protect_instance_name" \
     #  "us-south" \
@@ -516,30 +524,124 @@ function delete_secret {
 
 ## ----------------------------------------------------------------------------
 
-function assign_iam_writer_access_for_service {
+function iam_writer_access {
     ##
-    # assign_iam_writer_access_for_service $VAULT_SERVICE_NAME $VAULT_GUID $SERVICE_ID
+    # iam_writer_access $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP $SOURCE_SERVICE_NAME $SOURCE_SERVICE_GUID
     #
-    
-    section "Begin: assign_iam_writer_access_for_service: $1"
+
+    ##
+    # Typical usage:
+    # --------------
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+    #iam_writer_access \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group" \
+    #  "my_other_integrated_service_instance_name" \
+    #  "my_other_integrated_service_instance_guid"
+
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
+    RESOURCE_GROUP=$3
+    SOURCE_SERVICE_NAME=$4
+    SOURCE_SERVICE_GUID=$5
+
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
+    check_value $RESOURCE_GROUP
+    check_value $SOURCE_SERVICE_NAME
+    check_value $SOURCE_SERVICE_GUID
+
+    section "Begin: iam_writer_access: $VAULT_SERVICE_NAME"
+
+    ibmcloud target -g $RESOURCE_GROUP
+
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
+
+    check_value $VAULT_MANAGEMENT_URL
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
+
+    echo "-----------------"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+    echo "VAULT_GUID=$VAULT_GUID"
+    echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+    echo "-----------------"
+
+    # the current User running this script will used as the owner of the service ID binding...
+    TARGET_USER=$(ibmcloud target | grep User | awk '{print $2}')
+    check_value "$TARGET_USER"
+    echo "TARGET_USER=$TARGET_USER"
+
+    VAULT_IAM_SERVICE_ID_KEY_NAME=$VAULT_SERVICE_NAME-iam-service-id-$VAULT_GUID-$TARGET_USER
+    check_value $VAULT_IAM_SERVICE_ID_KEY_NAME
+
+    # create a service ID that will be used for an IAM binding of service A and B (the secrets management vault)...
+    if check_exists "$(ibmcloud iam service-id $VAULT_IAM_SERVICE_ID_KEY_NAME 2>&1)"; then
+      echo "Reusing Service ID named '$VAULT_IAM_SERVICE_ID_KEY_NAME' as it already exists..."
+    else
+      echo "Creating new Service ID named '$VAULT_IAM_SERVICE_ID_KEY_NAME'..."
+      ibmcloud iam service-id-create "$VAULT_IAM_SERVICE_ID_KEY_NAME" -d "serviceID for secrets management vault iam binding"
+    fi
+    SERVICE_ID=$(ibmcloud iam service-id "$VAULT_IAM_SERVICE_ID_KEY_NAME" --uuid)
+    echo "SERVICE_ID=$SERVICE_ID"
+    check_value "$SERVICE_ID"
     
     EXISTING_POLICIES=$(ibmcloud iam service-policies $SERVICE_ID --output json)
     echo "EXISTING_POLICIES=$EXISTING_POLICIES"
     check_value "$EXISTING_POLICIES"
 
-    # Create a policy to make serviceID a writer for Key Protect
+    # create a policy (if it doesn't already exist) to make serviceID
+    # a writer for the secrets management vault instance...
     if echo "$EXISTING_POLICIES" | \
-    jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$VAULT_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
-        echo "Writer policy on Key Protect already exist for the Service ID"
+      jq -e -r 'select(.[].resources[].attributes[].name=="serviceInstance" and .[].resources[].attributes[].value=="'$VAULT_GUID'" and .[].roles[].display_name=="Writer")' > /dev/null; then
+        echo "Writer policy on '$VAULT_SERVICE_NAME' already exist for the Service ID"
     else
+        echo "Creating new Writer policy on '$VAULT_SERVICE_NAME' for the Service ID"
         ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name kms --service-instance $VAULT_GUID --force
     fi
 
-    VAULT_CREDENTIALS=$(ibmcloud resource service-key $1-acckey-$VAULT_GUID --output JSON)
+    VAULT_CREDENTIALS=$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME --output JSON)
+    check_value $VAULT_CREDENTIALS
     VAULT_IAM_APIKEY=$(echo "$VAULT_CREDENTIALS" | jq -r .[0].credentials.apikey)
+    check_value $VAULT_IAM_APIKEY
     VAULT_ACCESS_TOKEN=$(get_access_token $VAULT_IAM_APIKEY)
+    check_value $VAULT_ACCESS_TOKEN
 
-    section "End: assign_iam_writer_access_for_service: $1"
+    echo "VAULT_CREDENTIALS=$VAULT_CREDENTIALS"
+    echo "VAULT_IAM_APIKEY=$VAULT_IAM_APIKEY"
+    echo "VAULT_ACCESS_TOKEN=$VAULT_ACCESS_TOKEN"
+    echo "-----------------"
+
+    # create the cross authorization between service A and B (the secrets management vault instance)...
+    if ibmcloud iam authorization-policies | \
+      grep -A 4 "Source service name:       $SOURCE_SERVICE_NAME" | \
+      grep -A 3 "All instances" | \
+      grep -A 2 "Target service name:       $VAULT_SERVICE_NAME" | \
+      grep -q "Reader"; then
+      echo "Authorization policy exists"
+    else
+      echo "Authorization policy does not exist"
+      ibmcloud iam authorization-policy-create \
+        $SOURCE_SERVICE_NAME \
+        $VAULT_SERVICE_NAME \
+        Reader
+    fi
+
+    # grant Writer role for the source service to the secrets management vault serviceID...
+    if ibmcloud iam service-policies $SERVICE_ID | grep -B 4 $SOURCE_SERVICE_GUID | grep Writer; then
+      echo "Writer policy on '$SOURCE_SERVICE_NAME' already exist for the secrets management vault service ID"
+    else
+      echo "Assigning Writer policy on '$SOURCE_SERVICE_NAME' to the secrets management vault service ID..."
+      ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name $SOURCE_SERVICE_NAME --service-instance $SOURCE_SERVICE_GUID -f
+    fi
+
+    section "End: iam_writer_access: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
@@ -547,48 +649,123 @@ function assign_iam_writer_access_for_service {
 # get an instance of the secrets vault...
 function get_vault_instance {
     ##
-    # keyprotect assumed default at the moment but
-    # optional hashicorp vault provider should be
-    # handled/tested here too...
-    
-    section "Begin: create_vault_instance: $1"
-    
+    # get_vault_instance $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP
     #
-    # create_vault_instance service-name VAULT_REGION
-    #
-    # eg: create_vault_instance secure-file-storage-kms VAULT_REGION
+
     ##
-    if check_exists "$(ibmcloud resource service-instance $1 2>&1)"; then
-        echo "Key Protect service named '$1' already exists"
+    # Typical usage:
+    # --------------
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+    #get_vault_instance \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group"
+
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
+    RESOURCE_GROUP=$3
+
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
+    check_value $RESOURCE_GROUP
+
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "RESOURCE_GROUP=$RESOURCE_GROUP"
+    echo "-----------------"
+
+    section "Begin: get_vault_instance: $VAULT_SERVICE_NAME"
+
+    ibmcloud target -g $RESOURCE_GROUP
+
+    if check_exists "$(ibmcloud resource service-instance $VAULT_SERVICE_NAME 2>&1)"; then
+        echo "Service named '$VAULT_SERVICE_NAME' already exists."
     else
-        ibmcloud resource service-instance-create $1 kms tiered-pricing $2 || exit 1
+        echo "Creating new instance of service named '$VAULT_SERVICE_NAME'..."
+        ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
     fi
 
-    VAULT_INSTANCE_ID=$(get_instance_id $1)
-    VAULT_GUID=$(get_guid $1)
+    VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+    VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+    VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
+
+    check_value $VAULT_INSTANCE_ID
+    check_value $VAULT_GUID
+    check_value $VAULT_SERVICE_SERVICE_KEY_NAME
+
     echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
     echo "VAULT_GUID=$VAULT_GUID"
-    check_value "$VAULT_INSTANCE_ID"
-    check_value "$VAULT_GUID"
+    echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+    echo "-----------------"
 
-    if check_exists "$(ibmcloud resource service-key $1-acckey-$VAULT_GUID 2>&1)"; then
-        echo "Key Protect key already exists"
+    if check_exists "$(ibmcloud resource service-key $VAULT_SERVICE_SERVICE_KEY_NAME 2>&1)"; then
+        echo "Service key named '$VAULT_SERVICE_SERVICE_KEY_NAME' already exists."
     else
-        ibmcloud resource service-key-create $1-acckey-$VAULT_GUID Manager \
+        echo "Creating new service key named '$VAULT_SERVICE_SERVICE_KEY_NAME'..."
+        ibmcloud resource service-key-create $VAULT_SERVICE_SERVICE_KEY_NAME Manager \
             --instance-id "$VAULT_INSTANCE_ID" || exit 1
     fi
     
-    section "End: create_vault_instance: $1"
+    section "End: get_vault_instance: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
 
 function delete_vault_instance {
     ##
-    # 
+    # delete_vault_instance $VAULT_SERVICE_NAME $VAULT_REGION $RESOURCE_GROUP
+    #
+
     ##
-    
+    # Typical usage:
+    # --------------
+    #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+    #delete_vault_instance \
+    #  "my_key_protect_instance_name" \
+    #  "us-south" \
+    #  "my_resource_group"
+
+    VAULT_SERVICE_NAME=$1
+    VAULT_REGION=$2
+    RESOURCE_GROUP=$3
+
+    check_value $VAULT_SERVICE_NAME
+    check_value $VAULT_REGION
+    check_value $RESOURCE_GROUP
+
+    echo "VAULT_SERVICE_NAME=$VAULT_SERVICE_NAME"
+    echo "VAULT_REGION=$VAULT_REGION"
+    echo "RESOURCE_GROUP=$RESOURCE_GROUP"
+    echo "-----------------"
+
     section "Begin: delete_vault_instance: $VAULT_SERVICE_NAME"
+
+    ibmcloud target -g $RESOURCE_GROUP
+
+    if check_exists "$(ibmcloud resource service-instance $VAULT_SERVICE_NAME 2>&1)"; then
+      echo "Service named '$VAULT_SERVICE_NAME' exists - proceeding to delete this instance..."
+
+      VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
+      VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
+      VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
+
+      check_value $VAULT_INSTANCE_ID
+      check_value $VAULT_GUID
+      check_value $VAULT_SERVICE_SERVICE_KEY_NAME
+
+      echo "VAULT_INSTANCE_ID=$VAULT_INSTANCE_ID"
+      echo "VAULT_GUID=$VAULT_GUID"
+      echo "VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_SERVICE_KEY_NAME"
+      echo "-----------------"
+
+      # now nuke the service instance and associated service id...
+      ibmcloud resource service-instance-delete -f --recursive $VAULT_SERVICE_NAME
+      ibmcloud iam service-id-delete -f $VAULT_SERVICE_SERVICE_KEY_NAME
+    else
+      echo "Service named '$VAULT_SERVICE_NAME' doesn't exist in the '$VAULT_REGION' region so cannot delete it."
+    fi
+
+    section "End: delete_vault_instance: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
