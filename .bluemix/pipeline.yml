@@ -78,9 +78,7 @@ stages:
 
       echo "BYOK_ID for pem file secret is ${BYOK_ID}"
 
-      curl -s -X GET \
-        https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/IMG_5043.jpeg \
-        -o IMG_5043.jpeg
+      curl -s -X GET https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/IMG_5043.jpeg -o IMG_5043.jpeg
 
       base64 -w 0 IMG_5043.jpeg > IMG_5043.jpeg.b64
       ENC_VALUE="$(cat IMG_5043.jpeg.b64)"
