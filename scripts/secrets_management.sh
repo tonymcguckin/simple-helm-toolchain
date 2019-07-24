@@ -67,7 +67,7 @@ function save_byok_secret {
     check_value $SECRET_NAME
     check_value $SECRET_MATERIAL
 
-    section "Begin: save_byok_secret: $VAULT_SERVICE_NAME"
+    #section "Begin: save_byok_secret: $VAULT_SERVICE_NAME"
 
     ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
@@ -186,7 +186,7 @@ function save_byok_secret {
     #echo "$VAULT_SECRET_ID"
     #echo "-----------------"
 
-    section "End: save_byok_secret: $VAULT_SERVICE_NAME"
+    #section "End: save_byok_secret: $VAULT_SERVICE_NAME"
 
     echo $VAULT_SECRET_ID
 }
@@ -221,9 +221,9 @@ function generate_auto_secret {
     check_value $SECRET_NAME
     check_value $EXTRACTABLE
 
-    section "Begin: generate_auto_secret: $VAULT_SERVICE_NAME"
+    #section "Begin: generate_auto_secret: $VAULT_SERVICE_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     PROCEED=0
 
@@ -339,9 +339,9 @@ function generate_auto_secret {
     #echo "$VAULT_SECRET_ID"
     #echo "-----------------"
 
-    section "End: generate_auto_secret: $VAULT_SERVICE_NAME"
+    #section "End: generate_auto_secret: $VAULT_SERVICE_NAME"
 
-    return $VAULT_SECRET_ID
+    echo $VAULT_SECRET_ID
 }
 
 ## ----------------------------------------------------------------------------
@@ -371,9 +371,9 @@ function retrieve_secret {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
@@ -435,9 +435,9 @@ function retrieve_secret {
     #echo "$RETRIEVED_SECRET_MATERIAL"
     #echo "-----------------"
 
-    section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    return $RETRIEVED_SECRET_MATERIAL
+    echo $RETRIEVED_SECRET_MATERIAL
 }
 
 ## ----------------------------------------------------------------------------
@@ -467,9 +467,9 @@ function retrieve_secret_byname {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
@@ -531,9 +531,9 @@ function retrieve_secret_byname {
     #echo "$RETRIEVED_SECRET_MATERIAL"
     #echo "-----------------"
 
-    section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    return $RETRIEVED_SECRET_MATERIAL
+    echo $RETRIEVED_SECRET_MATERIAL
 }
 
 ## ----------------------------------------------------------------------------
@@ -563,9 +563,9 @@ function retrieve_secret_byid {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
@@ -627,9 +627,9 @@ function retrieve_secret_byid {
     #echo "$RETRIEVED_SECRET_MATERIAL"
     #echo "-----------------"
 
-    section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    return $RETRIEVED_SECRET_MATERIAL
+    echo $RETRIEVED_SECRET_MATERIAL
 }
 
 ## ----------------------------------------------------------------------------
@@ -659,9 +659,9 @@ function retrieve_secret_bydesc {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "Begin: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
@@ -723,9 +723,9 @@ function retrieve_secret_bydesc {
     #echo "$RETRIEVED_SECRET_MATERIAL"
     #echo "-----------------"
 
-    section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "End: retrieve_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    return $RETRIEVED_SECRET_MATERIAL
+    echo $RETRIEVED_SECRET_MATERIAL
 }
 
 ## ----------------------------------------------------------------------------
@@ -755,9 +755,9 @@ function delete_secret {
     check_value $RESOURCE_GROUP
     check_value $SECRET_NAME
 
-    section "Begin: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "Begin: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
@@ -815,9 +815,9 @@ function delete_secret {
     --header "Accept: application/vnd.ibm.kms.key+json")
     #check_value $DELETE_SECRET_RESPONSE
 
-    section "End: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
+    #section "End: delete_secret: $VAULT_SERVICE_NAME :: $SECRET_NAME"
 
-    return $DELETE_SECRET_RESPONSE
+    echo $DELETE_SECRET_RESPONSE
 }
 
 ## ----------------------------------------------------------------------------
@@ -850,9 +850,9 @@ function iam_writer_access {
     check_value $SOURCE_SERVICE_NAME
     check_value $SOURCE_SERVICE_GUID
 
-    section "Begin: iam_writer_access: $VAULT_SERVICE_NAME"
+    #section "Begin: iam_writer_access: $VAULT_SERVICE_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
@@ -945,7 +945,7 @@ function iam_writer_access {
       ibmcloud iam service-policy-create $SERVICE_ID --roles Writer --service-name $SOURCE_SERVICE_NAME --service-instance $SOURCE_SERVICE_GUID -f
     fi
 
-    section "End: iam_writer_access: $VAULT_SERVICE_NAME"
+    #section "End: iam_writer_access: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
@@ -978,9 +978,9 @@ function get_vault_instance {
     #echo "RESOURCE_GROUP=$RESOURCE_GROUP"
     #echo "-----------------"
 
-    section "Begin: get_vault_instance: $VAULT_SERVICE_NAME"
+    #section "Begin: get_vault_instance: $VAULT_SERVICE_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     if check_exists "$(ibmcloud resource service-instance $VAULT_SERVICE_NAME 2>&1)"; then
       #echo "Service named '$VAULT_SERVICE_NAME' already exists."
@@ -1012,7 +1012,7 @@ function get_vault_instance {
         --instance-id "$VAULT_INSTANCE_ID" || exit 1
     fi
     
-    section "End: get_vault_instance: $VAULT_SERVICE_NAME"
+    #section "End: get_vault_instance: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
@@ -1044,9 +1044,9 @@ function delete_vault_instance {
     #echo "RESOURCE_GROUP=$RESOURCE_GROUP"
     #echo "-----------------"
 
-    section "Begin: delete_vault_instance: $VAULT_SERVICE_NAME"
+    #section "Begin: delete_vault_instance: $VAULT_SERVICE_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     PROCEED=0
 
@@ -1074,7 +1074,7 @@ function delete_vault_instance {
       PROCEED=1
     fi
 
-    section "End: delete_vault_instance: $VAULT_SERVICE_NAME"
+    #section "End: delete_vault_instance: $VAULT_SERVICE_NAME"
 }
 
 ## ----------------------------------------------------------------------------
