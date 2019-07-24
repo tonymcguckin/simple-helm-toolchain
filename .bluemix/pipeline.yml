@@ -71,6 +71,21 @@ stages:
 
       echo "BYOK_ID for secret is ${BYOK_ID}"
 
+      BYOK_ID2=$(save_byok_secret \
+          "tmg-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "tmg-secret-name2" \
+          "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NT \
+          cUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVp \
+          JQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERK \
+          akZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONH \
+          RwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcr \
+          UFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQ \
+          otLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=" \
+        )
+      echo "BYOK_ID2 for secret is ${BYOK_ID2}"
+
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
       echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}"
@@ -748,7 +763,7 @@ stages:
       ##
       # delete the following named secret from the secrets management vault...
       #
-      DELETE_RESPONSE=$(
+      DELETE_SECRET_RESPONSE=$(
         delete_secret \
           "tmg-secrets-vault" \
           "us-south" \
@@ -756,4 +771,16 @@ stages:
           "tmg-secret-name" \
         )
 
-      echo "DELETE_RESPONSE for secret is ${DELETE_RESPONSE}"
+      echo "DELETE_SECRET_RESPONSE for secret is ${DELETE_SECRET_RESPONSE}"
+
+      ##
+      # delete the following named secrets management vault...
+      #
+      DELETE_VAULT_RESPONSE=$(
+        delete_vault_instance \
+          "tmg-secrets-vault" \
+          "us-south" \
+          "devex-playground"
+        )
+
+      echo "DELETE_VAULT_RESPONSE for secrets management vault is ${DELETE_VAULT_RESPONSE}"
