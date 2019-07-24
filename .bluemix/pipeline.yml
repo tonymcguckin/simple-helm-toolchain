@@ -71,20 +71,34 @@ stages:
 
       echo "BYOK_ID for secret is ${BYOK_ID}"
 
+      pwd
+      ls -al
+
+      base64 -w 0 README.md > README.md.base64
+      ENC_VALUE="$(cat README.md.base64)"
+      echo "ENV_VALUE is ${ENC_VALUE}"
+
       BYOK_ID2=$(save_byok_secret \
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "tmg-secret-name2" \
-          "LS0tLS1CRUdJTiBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQpyb2xlOiByb290CgpNSUh1TUVrR0NT \
-          cUdTSWIzRFFFRkRUQThNQnNHQ1NxR1NJYjNEUUVGRERBT0JBZ3hvNUVjNHJYWjBnSUNDQUF3CkhRWUpZSVp \
-          JQVdVREJBRXFCQkNZVGdGeTJUQkQzbzhLQVlXVmtOZkJCSUdnL1ZFUVpKMzBid0xBNUpnT2l1VWUKZEFqdERK \
-          akZuTzZCa1c2alVqUWRyYUF1aDY5VW9RQXFyYTU1M1hhTTQ0d1A1OTZJVDRFR2ZwN1BiNUZDeEdpeApCRVZONH \
-          RwdDFMbFM5aVBTMmpVa0xLby84Q2w4UURqcjRqU0dhYWhWMDMzcWwxcE96YkdtU0ZJVFVJMWVrRkNqCkczemcr \
-          UFdrVEsrOTlSNGQwdjBZbk8veGJzYzV2Yk42RUhQelJOcGVUOHJJM3hEZmFWckhQV1lLaUZJZ0JiZXMKN3c9PQ \
-          otLS0tLUVORCBFTkNSWVBURUQgUFJJVkFURSBLRVktLS0tLQo=" \
+          "tmg-secret-name1" \
+          $ENC_VALUE \
         )
       echo "BYOK_ID2 for secret is ${BYOK_ID2}"
+
+      BYOK_VALUE2=$(
+        retrieve_secret \
+          "tmg-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "tmg-secret-name1" \
+        )
+
+      echo "BYOK_VALUE2 for secret is ${BYOK_VALUE2}"
+
+      #base64 -d $BYOK_VALUE2 > README.md.decoded
+      #cat README.md.decoded
 
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
