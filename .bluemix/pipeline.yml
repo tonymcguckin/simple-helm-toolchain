@@ -47,11 +47,6 @@ stages:
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
 
-      VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}
-      RESOURCE_GROUP=${RESOURCE_GROUP}
-      echo "VAULT_SERVICE_NAME=${VAULT_SERVICE_NAME}"
-      echo "RESOURCE_GROUP=${RESOURCE_GROUP}"
-
       ##
       # import the Secrets Management scripting library into this scope...
       #
@@ -75,22 +70,8 @@ stages:
           "devex-playground" \
           "pem-file-secret" \
           $ENC_VALUE \
-        )
-
-      echo "BYOK_ID for pem file secret is ${BYOK_ID}"
-
-      #curl -s -X GET https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/IMG_5043.jpeg -o IMG_5043.jpeg
-      #base64 -w 0 IMG_5043.jpeg > IMG_5043.jpeg.b64
-      #ENC_VALUE="$(cat IMG_5043.jpeg.b64)"
-      #BYOK_ID=$(
-      #  save_byok_secret \
-      #    "tmg-secrets-vault" \
-      #    "us-south" \
-      #    "devex-playground" \
-      #    "image-secret" \
-      #    $ENC_VALUE \
-      #  )
-      #echo "BYOK_ID for image secret is ${BYOK_ID}"
+      )
+      echo "BYOK_ID=${BYOK_ID}"
 
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"

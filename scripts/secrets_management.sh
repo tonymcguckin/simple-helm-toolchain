@@ -69,7 +69,7 @@ function save_byok_secret {
 
     section "Begin: save_byok_secret: $VAULT_SERVICE_NAME"
 
-    ibmcloud target -g $RESOURCE_GROUP
+    ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
     PROCEED=0
 
@@ -188,7 +188,7 @@ function save_byok_secret {
 
     section "End: save_byok_secret: $VAULT_SERVICE_NAME"
 
-    return $VAULT_SECRET_ID
+    echo $VAULT_SECRET_ID
 }
 
 ## ----------------------------------------------------------------------------
