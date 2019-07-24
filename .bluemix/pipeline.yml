@@ -50,8 +50,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
 
       curl -s -X GET \
         https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key \
@@ -279,9 +279,9 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
-
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      
       ##
       # retrieve the following named secret from the secrets management vault...
       #
@@ -291,13 +291,12 @@ stages:
           "us-south" \
           "devex-playground" \
           "pem-file-secret" \
-        )
+      )
+      echo "BYOK_VALUE=${BYOK_VALUE}"
 
-      echo "BYOK_VALUE for pem file secret is ${BYOK_VALUE}"
-
-      #base64 -d $BYOK_VALUE > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.decoded
-      #echo "PEM file decoded:"
-      #cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.decoded
+      base64 -i -d <<< $BYOK_VALUE > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
+      echo "PEM file decoded:"
+      cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
 
       # View build properties
       if [ -f build.properties ]; then 
@@ -750,8 +749,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      #source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
 
       ##
       # delete the following named secret from the secrets management vault...
@@ -762,8 +761,7 @@ stages:
           "us-south" \
           "devex-playground" \
           "pem-file-secret" \
-        )
-
+      )
       echo "DELETE_SECRET_RESPONSE for secret is ${DELETE_SECRET_RESPONSE}"
 
       ##
@@ -774,6 +772,5 @@ stages:
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground"
-        )
-
+      )
       echo "DELETE_VAULT_RESPONSE for secrets management vault is ${DELETE_VAULT_RESPONSE}"
