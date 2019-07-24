@@ -312,20 +312,9 @@ stages:
 
       echo "BYOK_VALUE for pem file secret is ${BYOK_VALUE}"
 
-      base64 -d $BYOK_VALUE > pem.key.decoded
-      echo "PEM file decoded:"
-      cat pem.key.decoded
-
-      #BYOK_VALUE=$(
-      #  retrieve_secret \
-      #    "tmg-secrets-vault" \
-      #    "us-south" \
-      #    "devex-playground" \
-      #    "image-secret" \
-      #  )
-      #echo "BYOK_VALUE for image secret is ${BYOK_VALUE}"
-      #base64 -d $BYOK_VALUE2 > README.md.decoded
-      #cat README.md.decoded
+      #base64 -d $BYOK_VALUE > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.decoded
+      #echo "PEM file decoded:"
+      #cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.decoded
 
       # View build properties
       if [ -f build.properties ]; then 
