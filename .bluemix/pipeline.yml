@@ -71,7 +71,9 @@ stages:
 
       echo "BYOK_ID for secret is ${BYOK_ID}"
 
-      pwd
+      curl -s -X GET https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key -o 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
+      curl -s -X GET https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/IMG_5043.jpeg -o IMG_5043.jpeg
+
       ls -al
 
       base64 -w 0 README.md > README.md.base64
