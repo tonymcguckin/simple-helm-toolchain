@@ -77,7 +77,7 @@ stages:
           "us-south" \
           "devex-playground" \
           "acme-git-service-password" \
-          "MMmyRrrRRea11yLLOONGGGpPPPAsswWooo0RrDdd" \
+          "Hello world it's me!" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
 
