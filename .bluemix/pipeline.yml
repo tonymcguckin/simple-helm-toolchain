@@ -57,8 +57,10 @@ stages:
         https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key \
         -o 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
 
-      base64 -w 0 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.b64
-      ENC_VALUE="$(cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.b64)"
+      #base64 -w 0 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.b64
+      #ENC_VALUE="$(cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.b64)"
+
+      ENC_VALUE="$(cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key)"
 
       ##
       # save the following named secret and specified base64 data into the secrets management vault...
@@ -70,6 +72,19 @@ stages:
           "devex-playground" \
           "pem-file-secret" \
           $ENC_VALUE \
+      )
+      echo "BYOK_ID=${BYOK_ID}"
+
+      ##
+      # save the following named secret and specified base64 data into the secrets management vault...
+      #
+      BYOK_ID=$(
+        save_secret \
+          "tmg-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "plain-text-secret" \
+          "Hello world it's me!" \
       )
       echo "BYOK_ID=${BYOK_ID}"
 
@@ -294,9 +309,21 @@ stages:
       )
       echo "BYOK_VALUE=${BYOK_VALUE}"
 
-      base64 -i -d <<< $BYOK_VALUE > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
-      echo "PEM file decoded:"
-      cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
+      #base64 -i -d <<< $BYOK_VALUE > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
+      #echo "PEM file decoded:"
+      #cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
+
+      ##
+      # retrieve the following named secret from the secrets management vault...
+      #
+      BYOK_VALUE=$(
+        retrieve_secret \
+          "tmg-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "plain-text-secret" \
+      )
+      echo "BYOK_VALUE=${BYOK_VALUE}"
 
       # View build properties
       if [ -f build.properties ]; then 
