@@ -300,30 +300,36 @@ stages:
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      BYOK_VALUE=$(
+      PEM_FILE_SECRET=$(
         retrieve_secret \
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
           "pem-file-secret" \
       )
-      echo "BYOK_VALUE=${BYOK_VALUE}"
-
-      #base64 -i -d <<< $BYOK_VALUE > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
-      #echo "PEM file decoded:"
-      #cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
 
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      BYOK_VALUE=$(
+      PLAIN_TEXT_SECRET=$(
         retrieve_secret \
           "tmg-secrets-vault" \
           "us-south" \
           "devex-playground" \
           "plain-text-secret" \
       )
-      echo "BYOK_VALUE=${BYOK_VALUE}"
+
+      echo "--------------------------------"
+      echo "PEM_FILE_SECRET value:"
+      echo $PEM_FILE_SECRET
+      echo "--------------------------------"
+      echo "PLAIN_TEXT_SECRET value:"
+      echo $PLAIN_TEXT_SECRET
+      echo "--------------------------------"
+      echo "PEM_FILE_SECRET file:"
+      echo $PEM_FILE_SECRET > secret.pem
+      cat secret.pem
+      echo "--------------------------------"
 
       # View build properties
       if [ -f build.properties ]; then 
