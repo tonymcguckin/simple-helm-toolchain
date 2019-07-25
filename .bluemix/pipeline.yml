@@ -46,47 +46,54 @@ stages:
       #    source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh")
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
+      # source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+
+      echo "------------------------------------------"
+      ##
+      # demo purposes only:
+      # docker content trust dynamically generates a 'key' file for docker build signing purposes...
+      # concept here is that we'll save the 'key' into the vault and discard the generated .key file....
+      #
+      curl -s -X GET \
+        https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key \
+        -o dct-signing.key
+      PEM_FILE_VALUE="$(cat dct-signing.key)"
+      echo "PEM_FILE_VALUE=${PEM_FILE_VALUE}"
+      rm dct-signing.key
+      echo "------------------------------------------"
 
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
-
-      curl -s -X GET \
-        https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key \
-        -o 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key
-
-      #base64 -w 0 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key > 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.b64
-      #ENC_VALUE="$(cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key.b64)"
-
-      ENC_VALUE="$(cat 0bc3889c3e4b8ca6c61a3f05289c591b55238fda1954f05c1de829309007ff96.key)"
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
 
       ##
-      # save the following named secret and specified base64 data into the secrets management vault...
+      # save the following named secret into the secrets management vault...
       #
-      BYOK_ID=$(
+      SECRET_GUID=$(
         save_secret \
-          "tmg-secrets-vault" \
+          "acme-org-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "pem-file-secret" \
-          $ENC_VALUE \
+          "acme-git-service-password" \
+          "MMMmyRrrrRRRea111yLLLLOOONNNGGGGpPPPPAAAssswWooo00000rRRrDdddDDD20190725" \
       )
-      echo "BYOK_ID=${BYOK_ID}"
+      echo "SECRET_GUID=${SECRET_GUID}"
 
       ##
-      # save the following named secret and specified base64 data into the secrets management vault...
+      # save the following named secret into the secrets management vault...
       #
-      BYOK_ID=$(
+      SECRET_GUID=$(
         save_secret \
-          "tmg-secrets-vault" \
+          "acme-org-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "plain-text-secret" \
-          "Hello world it's me!" \
+          "acme-dct-signing-secret" \
+          $PEM_FILE_VALUE \
       )
-      echo "BYOK_ID=${BYOK_ID}"
+      echo "SECRET_GUID=${SECRET_GUID}"
+
+      echo "------------------------------------------"
 
       ibmcloud plugin update container-registry
       echo "REGISTRY_URL=${REGISTRY_URL}"
@@ -294,40 +301,37 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
       
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      PEM_FILE_SECRET=$(
+      DCT_SIGNING_SECRET=$(
         retrieve_secret \
-          "tmg-secrets-vault" \
+          "acme-org-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "pem-file-secret" \
+          "acme-dct-signing-secret" \
       )
 
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      PLAIN_TEXT_SECRET=$(
+      PASSWORD_SECRET=$(
         retrieve_secret \
-          "tmg-secrets-vault" \
+          "acme-org-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "plain-text-secret" \
+          "acme-git-service-password" \
       )
 
-      echo "--------------------------------"
-      echo "PEM_FILE_SECRET value:"
-      echo $PEM_FILE_SECRET
-      echo "--------------------------------"
-      echo "PLAIN_TEXT_SECRET value:"
-      echo $PLAIN_TEXT_SECRET
-      echo "--------------------------------"
-      echo "PEM_FILE_SECRET file:"
-      echo $PEM_FILE_SECRET > secret.pem
+      echo "----------------------------------------"
+      echo "DCT_SIGNING_SECRET=${DCT_SIGNING_SECRET}
+      echo "----------------------------------------"
+      echo "PASSWORD_SECRET=${PASSWORD_SECRET}
+      echo "----------------------------------------"
+      echo $DCT_SIGNING_SECRET > secret.pem
+      ls -al
       cat secret.pem
       echo "--------------------------------"
 
@@ -782,18 +786,29 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
 
       ##
       # delete the following named secret from the secrets management vault...
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "tmg-secrets-vault" \
+          "acme-org-secrets-vault" \
           "us-south" \
           "devex-playground" \
-          "pem-file-secret" \
+          "acme-dct-signing-secret" \
+      )
+      echo "DELETE_SECRET_RESPONSE for secret is ${DELETE_SECRET_RESPONSE}"
+
+      ##
+      # delete the following named secret from the secrets management vault...
+      #
+      DELETE_SECRET_RESPONSE=$(
+        delete_secret \
+          "acme-org-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "acme-git-service-password" \
       )
       echo "DELETE_SECRET_RESPONSE for secret is ${DELETE_SECRET_RESPONSE}"
 
@@ -802,7 +817,7 @@ stages:
       #
       DELETE_VAULT_RESPONSE=$(
         delete_vault_instance \
-          "tmg-secrets-vault" \
+          "acme-org-secrets-vault" \
           "us-south" \
           "devex-playground"
       )
