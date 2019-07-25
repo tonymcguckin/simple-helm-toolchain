@@ -60,6 +60,7 @@ stages:
       PEM_FILE_VALUE="$(cat dct-signing.key)"
       echo "PEM_FILE_VALUE=${PEM_FILE_VALUE}"
       rm dct-signing.key
+      ls -al
       echo "------------------------------------------"
 
       ##
@@ -76,7 +77,7 @@ stages:
           "us-south" \
           "devex-playground" \
           "acme-git-service-password" \
-          "MMMmyRrrrRRRea111yLLLLOOONNNGGGGpPPPPAAAssswWooo00000rRRrDdddDDD20190725" \
+          "MMmyRrrRRea11yLLOONGGGpPPPAsswWooo0RrDdd" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
 
@@ -89,7 +90,7 @@ stages:
           "us-south" \
           "devex-playground" \
           "acme-dct-signing-secret" \
-          $PEM_FILE_VALUE \
+          "${PEM_FILE_VALUE}" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
 
