@@ -91,7 +91,7 @@ stages:
           "us-south" \
           "devex-playground" \
           "acme-dct-signing-secret" \
-          $PEM_FILE_VALUE \
+          "$PEM_FILE_VALUE" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
 
