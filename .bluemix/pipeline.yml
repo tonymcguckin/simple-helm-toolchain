@@ -66,7 +66,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
 
       ##
       # save the following named secret into the secrets management vault...
@@ -90,7 +91,7 @@ stages:
           "us-south" \
           "devex-playground" \
           "acme-dct-signing-secret" \
-          "${PEM_FILE_VALUE}" \
+          $PEM_FILE_VALUE \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
 
@@ -302,7 +303,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
       
       ##
       # retrieve the following named secret from the secrets management vault...
@@ -327,9 +329,9 @@ stages:
       )
 
       echo "----------------------------------------"
-      echo "DCT_SIGNING_SECRET=${DCT_SIGNING_SECRET}
+      echo "DCT_SIGNING_SECRET=${DCT_SIGNING_SECRET}"
       echo "----------------------------------------"
-      echo "PASSWORD_SECRET=${PASSWORD_SECRET}
+      echo "PASSWORD_SECRET=${PASSWORD_SECRET}"
       echo "----------------------------------------"
       echo $DCT_SIGNING_SECRET > secret.pem
       ls -al
@@ -787,7 +789,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
 
       ##
       # delete the following named secret from the secrets management vault...
@@ -799,7 +802,7 @@ stages:
           "devex-playground" \
           "acme-dct-signing-secret" \
       )
-      echo "DELETE_SECRET_RESPONSE for secret is ${DELETE_SECRET_RESPONSE}"
+      echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
 
       ##
       # delete the following named secret from the secrets management vault...
@@ -811,7 +814,7 @@ stages:
           "devex-playground" \
           "acme-git-service-password" \
       )
-      echo "DELETE_SECRET_RESPONSE for secret is ${DELETE_SECRET_RESPONSE}"
+      echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
 
       ##
       # delete the following named secrets management vault...
@@ -822,4 +825,4 @@ stages:
           "us-south" \
           "devex-playground"
       )
-      echo "DELETE_VAULT_RESPONSE for secrets management vault is ${DELETE_VAULT_RESPONSE}"
+      echo "DELETE_VAULT_RESPONSE=${DELETE_VAULT_RESPONSE}"
