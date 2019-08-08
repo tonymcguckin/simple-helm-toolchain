@@ -46,8 +46,7 @@ stages:
       #    source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh")
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_prebuild.sh
-      # source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
-
+      
       echo "------------------------------------------"
       ##
       # demo purposes only:
@@ -66,9 +65,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
-
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      
       ##
       # save the following named secret into the secrets management vault...
       #
@@ -303,8 +301,7 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
       
       ##
       # retrieve the following named secret from the secrets management vault...
@@ -789,9 +786,8 @@ stages:
       ##
       # import the Secrets Management scripting library into this scope...
       #
-      #source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
-      source <(curl -sSL "https://raw.githubusercontent.com/tonymcguckin/simple-helm-toolchain/master/scripts/secrets_management.sh")
-
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      
       ##
       # delete the following named secret from the secrets management vault...
       #
