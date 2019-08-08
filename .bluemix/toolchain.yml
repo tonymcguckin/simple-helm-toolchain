@@ -27,14 +27,6 @@ toolchain:
     getting_started:
      $ref: "#/messages/template.gettingStarted"
 services:
-  myVault:
-    service_id: vault
-    parameters:
-      provider: hashicorp
-      endpoint: https://ibm.com/hashicorp
-      secrets:
-        - my_secret1
-        - my_secret2
   repo:
     service_id: >
       $env.source_provider ? $env.source_provider : 'hostedgit'
@@ -61,7 +53,7 @@ services:
           $text: pipeline.yml
         env:
           GIT_REPO: repo
-          CF_APP_NAME: $env.form.pipeline.parameters.app-name
+          CF_APP_NAME: '{{form.pipeline.parameters.app-name}}'
           REGISTRY_REGION_ID: '{{form.pipeline.parameters.registry-region}}'
           REGISTRY_NAMESPACE: '{{form.pipeline.parameters.registry-namespace}}'
           API_KEY: '{{form.pipeline.parameters.api-key}}'
@@ -69,8 +61,6 @@ services:
           PROD_RESOURCE_GROUP: '{{form.pipeline.parameters.prod-resource-group}}'
           PROD_CLUSTER_NAME: '{{form.pipeline.parameters.prod-cluster-name}}'
           PROD_CLUSTER_NAMESPACE: '{{form.pipeline.parameters.prod-cluster-namespace}}'
-          VAULT_SERVICE_NAME: 'hello-helm-vault-{{timestamp}}'
-          RESOURCE_GROUP: 'devex-playground'
         execute: true
   webide:
     service_id: orion
@@ -79,6 +69,5 @@ form:
     parameters:
       app-name: '{{services.repo.parameters.repo_name}}'
       prod-cluster-namespace: prod
-      my_secret_is: $env.services.myVault.secrets.my_secret1 
     schema:
       $ref: deploy.json
