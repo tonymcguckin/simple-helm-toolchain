@@ -349,6 +349,8 @@ stages:
       echo "----------------------------------------"
       echo "DCT_SIGNING_SECRET=${DCT_SIGNING_SECRET}"
       echo "----------------------------------------"
+      echo "ACME_ORG_APIKEY=${ACME_ORG_APIKEY}"
+      echo "----------------------------------------"
       echo "PASSWORD_SECRET=${PASSWORD_SECRET}"
       echo "----------------------------------------"
       echo $DCT_SIGNING_SECRET > secret.pem
