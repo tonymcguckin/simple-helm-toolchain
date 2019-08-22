@@ -79,6 +79,16 @@ stages:
           "Hello world it's me!" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
+      
+      SECRET_GUID=$(
+        save_secret \
+          "acme-org-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "acme-org-api-key" \
+          "jWuGilJlWs0BI9ji3bWID6pLDhpP13iqmlXxsNg8aZ0e" \
+      )
+      echo "SECRET_GUID=${SECRET_GUID}"
 
       ##
       # save the following named secret into the secrets management vault...
@@ -312,6 +322,17 @@ stages:
           "us-south" \
           "devex-playground" \
           "acme-dct-signing-secret" \
+      )
+
+      ##
+      # retrieve the following named secret from the secrets management vault...
+      #
+      ACME_ORG_APIKEY=$(
+        retrieve_secret \
+          "acme-org-secrets-vault" \
+          "us-south" \
+          "devex-playground" \
+          "acme-org-api-key" \
       )
 
       ##
