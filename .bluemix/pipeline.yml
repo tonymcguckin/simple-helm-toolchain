@@ -74,7 +74,7 @@ stages:
         save_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "git-service-password" \
           "Hello world it's me!" \
       )
@@ -84,7 +84,7 @@ stages:
         save_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "org-api-key" \
           "T0ahgr7cIopXceHqbiKgzyXA9RbTeJqI5dkgSXNMYiBY" \
       )
@@ -97,7 +97,7 @@ stages:
         save_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "dct-signing-secret" \
           "$PEM_FILE_VALUE" \
       )
@@ -320,7 +320,7 @@ stages:
         retrieve_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "dct-signing-secret" \
       )
 
@@ -331,7 +331,7 @@ stages:
         retrieve_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "org-api-key" \
       )
 
@@ -342,7 +342,7 @@ stages:
         retrieve_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "git-service-password" \
       )
 
@@ -818,7 +818,7 @@ stages:
         delete_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "dct-signing-secret" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
@@ -830,7 +830,7 @@ stages:
         delete_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "git-service-password" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
@@ -842,7 +842,7 @@ stages:
         delete_secret \
           "acme-org-kms-1" \
           "us-south" \
-          "default" \
+          "Default" \
           "org-api-key" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
@@ -854,6 +854,6 @@ stages:
         delete_vault_instance \
           "acme-org-kms-1" \
           "us-south" \
-          "default"
+          "Default"
       )
       echo "DELETE_VAULT_RESPONSE=${DELETE_VAULT_RESPONSE}"
