@@ -74,7 +74,7 @@ stages:
         save_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-git-service-password" \
           "Hello world it's me!" \
       )
@@ -84,7 +84,7 @@ stages:
         save_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-org-api-key" \
           "jWuGilJlWs0BI9ji3bWID6pLDhpP13iqmlXxsNg8aZ0e" \
       )
@@ -97,7 +97,7 @@ stages:
         save_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-dct-signing-secret" \
           "$PEM_FILE_VALUE" \
       )
@@ -320,7 +320,7 @@ stages:
         retrieve_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-dct-signing-secret" \
       )
 
@@ -331,7 +331,7 @@ stages:
         retrieve_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-org-api-key" \
       )
 
@@ -342,7 +342,7 @@ stages:
         retrieve_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-git-service-password" \
       )
 
@@ -818,7 +818,7 @@ stages:
         delete_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-dct-signing-secret" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
@@ -830,8 +830,20 @@ stages:
         delete_secret \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground" \
+          "default" \
           "acme-git-service-password" \
+      )
+      echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
+
+      ##
+      # delete the following named secret from the secrets management vault...
+      #
+      DELETE_SECRET_RESPONSE=$(
+        delete_secret \
+          "acme-org-secrets-vault" \
+          "us-south" \
+          "default" \
+          "acme-org-api-key" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
 
@@ -842,6 +854,6 @@ stages:
         delete_vault_instance \
           "acme-org-secrets-vault" \
           "us-south" \
-          "devex-playground"
+          "default"
       )
       echo "DELETE_VAULT_RESPONSE=${DELETE_VAULT_RESPONSE}"
