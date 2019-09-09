@@ -86,7 +86,7 @@ stages:
           "us-south" \
           "default" \
           "org-api-key" \
-          "jWuGilJlWs0BI9ji3bWID6pLDhpP13iqmlXxsNg8aZ0e" \
+          "T0ahgr7cIopXceHqbiKgzyXA9RbTeJqI5dkgSXNMYiBY" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
 
