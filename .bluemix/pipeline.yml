@@ -72,20 +72,20 @@ stages:
       #
       SECRET_GUID=$(
         save_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-git-service-password" \
+          "git-service-password" \
           "Hello world it's me!" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
       
       SECRET_GUID=$(
         save_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-org-api-key" \
+          "org-api-key" \
           "jWuGilJlWs0BI9ji3bWID6pLDhpP13iqmlXxsNg8aZ0e" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
@@ -95,10 +95,10 @@ stages:
       #
       SECRET_GUID=$(
         save_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-dct-signing-secret" \
+          "dct-signing-secret" \
           "$PEM_FILE_VALUE" \
       )
       echo "SECRET_GUID=${SECRET_GUID}"
@@ -318,40 +318,40 @@ stages:
       #
       DCT_SIGNING_SECRET=$(
         retrieve_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-dct-signing-secret" \
+          "dct-signing-secret" \
       )
 
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      ACME_ORG_APIKEY=$(
+      ORG_API_KEY=$(
         retrieve_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-org-api-key" \
+          "org-api-key" \
       )
 
       ##
       # retrieve the following named secret from the secrets management vault...
       #
-      PASSWORD_SECRET=$(
+      GIT_SERVICE_PASSWORD=$(
         retrieve_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-git-service-password" \
+          "git-service-password" \
       )
 
       echo "----------------------------------------"
       echo "DCT_SIGNING_SECRET=${DCT_SIGNING_SECRET}"
       echo "----------------------------------------"
-      echo "ACME_ORG_APIKEY=${ACME_ORG_APIKEY}"
+      echo "ORG_API_KEY=${ORG_API_KEY}"
       echo "----------------------------------------"
-      echo "PASSWORD_SECRET=${PASSWORD_SECRET}"
+      echo "GIT_SERVICE_PASSWORD=${GIT_SERVICE_PASSWORD}"
       echo "----------------------------------------"
       echo $DCT_SIGNING_SECRET > secret.pem
       ls -al
@@ -442,6 +442,56 @@ stages:
       #    source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_predeploy_helm.sh")
       # ------------------
       # source: https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/check_predeploy_helm.sh
+
+      ##
+      # import the Secrets Management scripting library into this scope...
+      #
+      source <(curl -sSL "https://raw.githubusercontent.com/open-toolchain/commons/master/scripts/secrets_management.sh")
+      
+      ##
+      # retrieve the following named secret from the secrets management vault...
+      #
+      DCT_SIGNING_SECRET=$(
+        retrieve_secret \
+          "acme-org-kms" \
+          "us-south" \
+          "default" \
+          "dct-signing-secret" \
+      )
+
+      ##
+      # retrieve the following named secret from the secrets management vault...
+      #
+      ORG_API_KEY=$(
+        retrieve_secret \
+          "acme-org-kms" \
+          "us-south" \
+          "default" \
+          "org-api-key" \
+      )
+
+      ##
+      # retrieve the following named secret from the secrets management vault...
+      #
+      GIT_SERVICE_PASSWORD=$(
+        retrieve_secret \
+          "acme-org-kms" \
+          "us-south" \
+          "default" \
+          "git-service-password" \
+      )
+
+      echo "----------------------------------------"
+      echo "DCT_SIGNING_SECRET=${DCT_SIGNING_SECRET}"
+      echo "----------------------------------------"
+      echo "ORG_API_KEY=${ORG_API_KEY}"
+      echo "----------------------------------------"
+      echo "GIT_SERVICE_PASSWORD=${GIT_SERVICE_PASSWORD}"
+      echo "----------------------------------------"
+      echo $DCT_SIGNING_SECRET > secret.pem
+      ls -al
+      cat secret.pem
+      echo "--------------------------------"
 
       # This script checks the IBM Container Service cluster is ready, has a namespace configured with access to the private
       # image registry (using an IBM Cloud API Key). It also configures Helm Tiller service to later perform a deploy with Helm.
@@ -816,10 +866,10 @@ stages:
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-dct-signing-secret" \
+          "dct-signing-secret" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
 
@@ -828,10 +878,10 @@ stages:
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-git-service-password" \
+          "git-service-password" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
 
@@ -840,10 +890,10 @@ stages:
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default" \
-          "acme-org-api-key" \
+          "org-api-key" \
       )
       echo "DELETE_SECRET_RESPONSE=${DELETE_SECRET_RESPONSE}"
 
@@ -852,7 +902,7 @@ stages:
       #
       DELETE_VAULT_RESPONSE=$(
         delete_vault_instance \
-          "acme-org-secrets-vault" \
+          "acme-org-kms" \
           "us-south" \
           "default"
       )
