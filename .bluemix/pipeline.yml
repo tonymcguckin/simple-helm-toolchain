@@ -72,7 +72,7 @@ stages:
       #
       SECRET_GUID=$(
         save_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "git-service-password" \
@@ -82,7 +82,7 @@ stages:
       
       SECRET_GUID=$(
         save_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "org-api-key" \
@@ -95,7 +95,7 @@ stages:
       #
       SECRET_GUID=$(
         save_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "dct-signing-secret" \
@@ -318,7 +318,7 @@ stages:
       #
       DCT_SIGNING_SECRET=$(
         retrieve_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "dct-signing-secret" \
@@ -329,7 +329,7 @@ stages:
       #
       ORG_API_KEY=$(
         retrieve_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "org-api-key" \
@@ -340,7 +340,7 @@ stages:
       #
       GIT_SERVICE_PASSWORD=$(
         retrieve_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "git-service-password" \
@@ -816,7 +816,7 @@ stages:
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "dct-signing-secret" \
@@ -828,7 +828,7 @@ stages:
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "git-service-password" \
@@ -840,7 +840,7 @@ stages:
       #
       DELETE_SECRET_RESPONSE=$(
         delete_secret \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default" \
           "org-api-key" \
@@ -852,7 +852,7 @@ stages:
       #
       DELETE_VAULT_RESPONSE=$(
         delete_vault_instance \
-          "acme-org-kms" \
+          "acme-org-kms-1" \
           "us-south" \
           "default"
       )
