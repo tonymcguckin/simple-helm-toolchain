@@ -68,7 +68,7 @@ services:
 form:
   pipeline:
     parameters:
-      app-name: '{{services.repo.parameters.repo_name}}'
+      app-name1: '{{services.repo.parameters.repo_name}}'
       prod-cluster-namespace: prod
     schema:
       $ref: deploy.json
