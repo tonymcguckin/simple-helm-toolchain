@@ -841,7 +841,7 @@ function get_access_token {
   --header "Accept: application/json" \
   --data-urlencode "grant_type=urn:ibm:params:oauth:grant-type:apikey" \
   --data-urlencode "apikey=$1" \
-  "https://iam.cloud.ibm.com/identity/token")
+  "https://iam.test.cloud.ibm.com/identity/token")
   IAM_ACCESS_TOKEN=$(echo "$IAM_ACCESS_TOKEN_FULL" | \
     grep -Eo '"access_token":"[^"]+"' | \
     awk '{split($0,a,":"); print a[2]}' | \
