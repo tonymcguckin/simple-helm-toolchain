@@ -86,12 +86,13 @@ function save_secret {
       ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
     fi
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
 
-    check_value $VAULT_MANAGEMENT_URL
+    check_value $
     check_value $VAULT_INSTANCE_ID
     check_value $VAULT_GUID
     check_value $VAULT_SERVICE_SERVICE_KEY_NAME
@@ -211,7 +212,8 @@ function generate_secret {
       ibmcloud resource service-instance-create $VAULT_SERVICE_NAME kms tiered-pricing $VAULT_REGION || exit 1
     fi
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
@@ -317,7 +319,8 @@ function retrieve_secret {
 
     ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
@@ -386,7 +389,8 @@ function retrieve_secret_byname {
 
     ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
@@ -453,7 +457,8 @@ function retrieve_secret_byid {
 
     ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
@@ -520,7 +525,8 @@ function retrieve_secret_bydesc {
 
     ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
@@ -587,7 +593,8 @@ function delete_secret {
 
     ibmcloud target -g $RESOURCE_GROUP > /dev/null
 
-    VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    #VAULT_MANAGEMENT_URL=https://$VAULT_REGION.kms.cloud.ibm.com/api/v2/keys
+    VAULT_MANAGEMENT_URL=https://qa.us-south.kms.test.cloud.ibm.com/api/v2/keys
     VAULT_INSTANCE_ID=$(get_instance_id $VAULT_SERVICE_NAME)
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
@@ -659,7 +666,6 @@ function iam_writer_access {
     VAULT_GUID=$(get_guid $VAULT_SERVICE_NAME)
     VAULT_SERVICE_SERVICE_KEY_NAME=$VAULT_SERVICE_NAME-service-key-$VAULT_GUID
 
-    check_value $VAULT_MANAGEMENT_URL
     check_value $VAULT_INSTANCE_ID
     check_value $VAULT_GUID
     check_value $VAULT_SERVICE_SERVICE_KEY_NAME
